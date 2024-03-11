@@ -24,10 +24,19 @@ print(len(relevant_matches), "relevent matches")
 
 print(len(os.listdir(url+'/events/')), "relevant events")
 
+#not necessary anymore ->  code that removed irrelevant lineups 
+# for lineup in os.listdir(url+'/lineups/'):
+#     if int(lineup[:-5]) not in relevant_matches:
+#         os.remove(url+'/lineups/'+lineup)
+
+print(len(os.listdir(url+'/lineups')), "relevant lineups")
+
+#load all the relevent json files -> code needs to be updated b/c releant_events var doesn't exist
 # for filename in relevant_events:
 #     event_json = json.load(open(url+'/events/'+filename, 'r', encoding='utf-8'))
 #     print(filename, "contains", len(event_json), "events")
 
+# get compeitions.json file
 # compeitions_json = json.load(open('./open-data/data/matches/11/1.json', 'r', encoding='utf-8'))
 # print(json.dumps(compeitions_json, indent=4))
 
