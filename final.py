@@ -15,21 +15,24 @@ for season in os.listdir(url+'/matches'):
 
 print(len(relevant_matches), "relevent matches")
 
-relevant_events = []
-for event in os.listdir(url+'/events/'):
-    if int(event[:-5]) in relevant_matches:
-        relevant_events.append(event)
+#not necessary anymore bc i removed all the irrelevant events from the folder
+# relevant_events = []
+# for event in os.listdir(url+'/events/'):
+#     if int(event[:-5]) in relevant_matches:
+#         relevant_events.append(event)
+# print(len(relevant_events), "relevent events")
 
-print(len(relevant_events), "relevent events")
+print(len(os.listdir(url+'/events/')), "relevant events")
 
-for filename in relevant_events:
-    event_json = json.load(open(url+'/events/'+filename, 'r', encoding='utf-8'))
-    print(filename, "contains", len(event_json), "events")
+# for filename in relevant_events:
+#     event_json = json.load(open(url+'/events/'+filename, 'r', encoding='utf-8'))
+#     print(filename, "contains", len(event_json), "events")
 
 # compeitions_json = json.load(open('./open-data/data/matches/11/1.json', 'r', encoding='utf-8'))
 # print(json.dumps(compeitions_json, indent=4))
-    
+
 print('done')
+
 
 # GET JSON FROM GITHUB
 # import requests
