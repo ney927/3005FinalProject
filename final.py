@@ -1,6 +1,6 @@
 import json
 import os
-url = './open-data/data'
+url = './data'
 seasons = ['2003/2004' , '2018/2019', '2019/2020', '2020/2021']
 relevant_matches = []
 # compeitions_json = json.load(open(url+'/competitions.json', 'r'))
