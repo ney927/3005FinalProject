@@ -1,4 +1,5 @@
 import psycopg2
+import json
 
 #this stuff is importing my postgres password which is in a file on my laptop and not in the git
 #change password var to your password if you want this to connect to your postgres
@@ -17,6 +18,50 @@ conn = psycopg2.connect(
 conn.autocommit = True
 cursor = conn.cursor()
 print("databse connected!")
+
+# creates and fills the Competitions table
+# IMPORTANT!! THIS WILL DELETE THE COMPETITIONS TABLE AFTER MAKING IT
+# TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
+url = './data'
+competitions_json = json.load(open(url+'/competitions.json', 'r', encoding='utf-8'))
+
+# generate the sql statement to insert competition data into the relation
+competition_attributes = ['competition_id', 'season_id', 'country_name', 'competition_name', 'competition_gender', 'competition_youth', 'competition_international', 'season_name']
+insert_competitions = 'INSERT INTO Competitions (competition_id, season_id, country_name, competition_name, competition_gender, competition_youth, competition_international, season_name) VALUES '
+for comp in competitions_json:
+    insertComp = '('
+    for attribute in competition_attributes:
+        value = str(comp[attribute])
+        value = value.replace('\'', '\'\'')
+        insertComp += '\'' + value + '\','
+    insertComp = insertComp[:-1] + '),'
+    insert_competitions += insertComp
+insert_competitions = insert_competitions[:-1] + ''
+
+# create competition table
+cursor.execute('''CREATE TABLE IF NOT EXISTS Competitions(
+               competition_id INT,
+               season_id INT,
+               country_name VARCHAR(255),
+               competition_name VARCHAR(255),
+               competition_gender VARCHAR(255),
+               competition_youth BOOL,
+               competition_international BOOL,
+               season_name VARCHAR(255)
+)''')
+
+# insert competition data
+cursor.execute(insert_competitions)
+
+#print competition data
+cursor.execute('SELECT * from Competitions')
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
+cursor.execute('DROP TABLE IF EXISTS Competitions') #DELETES COMPETITION TABLE
+
+
 
 conn.close()
 
