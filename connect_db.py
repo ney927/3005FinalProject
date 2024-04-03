@@ -59,8 +59,6 @@ rows = cursor.fetchall()
 for row in rows:
     print(row)
 
-cursor.execute('DROP TABLE IF EXISTS Competitions') #DELETES COMPETITION TABLE
-
 
 
 conn.close()
