@@ -2,6 +2,7 @@ import psycopg2
 import json
 import os
 import re 
+import datetime
 
 from db_secret import password
 
@@ -35,7 +36,7 @@ def insert_country_data():
             #match_attributes = ["match_id", "match_date", "kick_off", "competition", "season", "home_team", "away_team", "home_score", "away_score", "match_status", "match_status_360",
             #                    "last_updated", "last_updated_360", "metadata", "match_week", "competition_stage", "stadium", "referee"]
             #"home_team", "away_team",
-            grab_from_attribues = ["referee","stadium"]
+            grab_from_attribues = ["referee","stadium","away_team","home_team"]
             ct_atr = ["country"]
 
             #print('started loading country data from file: ' + filename)
@@ -52,13 +53,34 @@ def insert_country_data():
                         for attr in ct_atr:
                                 insertCount = '('
                                 insert_country = 'INSERT INTO countrys (id, name) VALUES '
-                            #if attr in attribute.asdict().keys():
+                                #if attr in attribute.asdict().keys():
                                 value = str(match[attribute])
                                 position = value.find('country')
 
+                                position2 = value.find('manager')
+                                to_extract2 = value[position2+90:position2+190]
+
+                                #get additional countrys from managers, (ex comoros)
+                                if to_extract2:
+                                    pos_id = re.findall(r'\'id\': (.*?)\, \'name', to_extract2)
+                                    pos_name = re.findall(r'\'name\': (.*?)\'}}', to_extract2)
+
+                                    if pos_name and pos_id:  
+
+                                        c_id = pos_id[0].replace('\'', '')
+                                        c_name = pos_name[0].replace('\'', '')
+
+                                        try_c = insert_country
+                                        try_c +=  '('+ c_id + ',' + '\'' + c_name + '\'' + '),'
+
+                                        try_c = try_c[:-1] + ' ON CONFLICT DO NOTHING'
+
+                                        cursor.execute(try_c)
+
+
 
                                 # country id starts at position+18 
-                                to_extract = value[position+17:position+90]
+                                to_extract = value[position+17:position+100]
                                 #print(to_extract)
             
                                 #grabing the country name
@@ -189,10 +211,172 @@ def insert_stadium_data():
 
     print('done insert_stadium_data()')
 
-insert_country_data()
-insert_referee_data()
-insert_stadium_data()
+def insert_team_data():
+    directory = url + '/matches'
+    #go through each match folder
+    for foldername in os.listdir(directory):
+        fol = os.path.join(directory, foldername)
+        
+        #go through each match file in the match folders
+        for filename in os.listdir(fol):
+            individual_match_json = json.load(open(fol + '/' + filename, 'r', encoding='utf-8'))
 
+            grab_from_attribues = ["home_team","away_team"]
+            
+            #if filename != '75.json':
+            #    continue
+            #print(foldername)
+            #print(filename)
+            #for each match in a json file
+            for match in individual_match_json:
+                
+                #for each dictionary (match)
+                for attribute in grab_from_attribues:
+                    #verify attribute is present 
+                    if attribute in match.keys():
+
+                        insert_team = 'INSERT INTO Teams (id, team_name, gender, team_group) VALUES ('
+
+                        value = str(match[attribute])
+                        #print(value)
+                        value = value.split(',')
+
+                        #get the team id
+                        team_id = value[0].split(' ')[1]
+                        #print(team_id)
+                        #print(team_id)
+
+                        #get team name
+                        team_name = value[1].split(': ')[1]
+                        team_name = team_name[1:-1]
+                        team_name = team_name.replace('\'', '\'\'')
+                        #print(team_name)
+
+                        #get team gender 
+                        team_gender = value[2].split(': ')[1]
+                        team_gender = team_gender[1:-1]
+
+                        #get team group 
+                        team_group = value[3].split(': ')[1]
+                        team_group = team_group.replace('\'', '')
+
+                        #get the country's id
+                        #country_id = value[2].split(': ')[2].replace(' ', '')
+                        #print(country_id)
+
+                        insert_team += team_id + ',' + '\'' + team_name + '\'' + ','  + '\'' + team_gender + '\'' + ',' + '\'' + team_group + '\'' + ') ON CONFLICT DO NOTHING'
+
+                        cursor.execute(insert_team)
+            #print('finished loading referee data from file: ' + filename)
+
+    print('done insert_team_data()')
+
+def insert_manager_data():
+    directory = url + '/matches'
+    #go through each match folder
+    for foldername in os.listdir(directory):
+        fol = os.path.join(directory, foldername)
+
+        #go through each match file in the match folders
+        for filename in os.listdir(fol):
+            individual_match_json = json.load(open(fol + '/' + filename, 'r', encoding='utf-8'))
+
+            grab_from_attribues = ["home_team","away_team"]
+            ct_atr = ["manager"]
+            
+            #print(foldername)
+            #print(filename)
+            #for each match in a json file
+            for match in individual_match_json:
+                
+                #for each dictionary (match)
+                for attribute in grab_from_attribues:
+                    #verify attribute is present 
+                    if attribute in match.keys():
+                    
+                        for attr in ct_atr:
+
+                            if ct_atr[0] in attr:
+                                insert_manager = 'INSERT INTO Managers (id, name, nickname, date_of_birth, country_id, team_id) VALUES ('
+
+                                value = str(match[attribute])
+                            
+                                #print(value)
+                                #p = re.findall(r' \"(.*?)\"', to_extract)
+                                team_id = re.findall(r'\_id(.*?)\'home_team_name', value)
+
+                                #if its a home team manager
+                                if team_id:
+                                    team_id = re.findall(r'\: (.*?)\,', team_id[0])
+                                    team_id = team_id[0]
+                                else: 
+                                    #away team manager
+                                    team_id = re.findall(r'\_id(.*?)\'away_team_name', value)
+                                    team_id = re.findall(r'\: (.*?)\,', team_id[0])
+                                    team_id = team_id[0]
+
+                                p = re.findall(r'\'managers\'(.*?)\}\}', value)
+
+                                #print(p)
+                                if p:
+                                    value = p[0].split(',')
+
+                                    #for o in value:
+                                    #    print(o)
+
+                                    #get the manager id
+                                    manager_id = value[0].split('\': ')[1]
+                                    #print(manager_id)
+
+                                    #get manager name
+                                    manager_name = value[1].split(': ')[1]
+                                    manager_name = manager_name[1:-1]
+                                    manager_name = manager_name.replace('\'', '\'\'')
+                                    #print(manager_name)
+
+                                    #get manager nickname
+                                    manager_nick = value[2].split(': ')[1]
+                                    manager_nick = manager_nick.replace('\'', '')
+                                    #print(manager_nick)
+
+                                    #get manager date of birth (dob)
+                                    manager_dob = value[3].split(': ')[1]
+                                    manager_dob = manager_dob.replace('\'', '')
+
+                                    #get manager country id 
+                                    manager_country_id = value[4].split(': ')[2]
+                                    manager_country_id = manager_country_id.replace('\'', '')
+
+                                    if 'None' in manager_dob:
+                                        insert_manager += manager_id + ',' + '\'' + manager_name + '\'' + ','  + '\'' + manager_nick + '\'' + ',' + 'NULL' + ',' +  manager_country_id + ',' + team_id + ') ON CONFLICT DO NOTHING'
+                                    else:
+                                        year = manager_dob.split('-')[0]
+                                        month = manager_dob.split('-')[1]
+                                        day = manager_dob.split('-')[2]
+
+                                        insert_manager += manager_id + ',' + '\'' + manager_name + '\'' + ','  + '\'' + manager_nick + '\'' + ',' + 'TO_DATE(\''+ year + month + day + '\',' + '\'YYYYMMDD\')'+ ',' +  manager_country_id + ',' + team_id + ') ON CONFLICT DO NOTHING'
+
+                                    #print(manager_dob)
+
+                                    cursor.execute(insert_manager)
+            
+            #print('finished loading referee data from file: ' + filename)
+
+    print('done insert_manager_data()')
+
+def insert_all_data():
+
+    insert_country_data()
+    
+    insert_referee_data()
+    
+    insert_stadium_data()
+
+    insert_team_data()
+
+    insert_manager_data()
+
+insert_all_data()
 conn.close()
 
 print('done.')
