@@ -24,6 +24,8 @@ url = './data'
 
 
 def insert_country_data():
+    #get all country data from teams, stadiums and referees
+
     directory = url + '/matches'
     #go through each match folder
     for foldername in os.listdir(directory):
@@ -115,6 +117,79 @@ def insert_country_data():
     #cursor.execute(insert_competitions)
 
     print('done insert_country_data()')
+
+def insert_country2_data():
+    #get all country data from players
+
+    directory = url + '/lineups'
+    #go through each file in lineups folder
+    for filename in os.listdir(directory):
+        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
+
+        grab_from_attribues = ["team_id","lineup"]
+
+        #if filename != '7298.json':
+        #    continue
+            
+        #print(foldername)
+        #print(filename)
+        #for each team in a json file
+        for team in individual_match_json:
+
+            #for each dictionary (match)
+            for attribute in grab_from_attribues:
+                #verify attribute is present
+                 
+
+
+                if attribute == "team_id":
+                    team_id = str(team[attribute])
+                    
+                if attribute == "lineup":
+                    lineup = str(team[attribute])
+                    lineup = lineup.split('}]}')
+
+                    #for each player
+                    for val in lineup:
+                        insert_country = 'INSERT INTO Countrys (id, name) VALUES ('
+
+                        if "," not in val:
+                            continue
+
+                        country_info = val.split(",")
+
+                        for country_data in country_info:
+                            #print(player_data)
+
+                            if "country" in country_data:
+                                country_id = country_data.split(': ')[2]
+                            
+                            if "name" in country_data:
+                                country_name = country_data.split('\': ')[1]
+                                country_name = country_name[1:-1]
+                                country_name = country_name.replace('}', '')
+                                country_name = country_name.replace('\"', '')
+
+                                if country_name.count('\'') == 1:
+                                    country_name = country_name.replace('\'', '\'\'')
+
+
+
+                        #print(player_id)
+                        #print(player_name)
+                        #print(player_nick)
+                        #print(jersey_number)
+                        #print(country_id)
+                        #print(team_id)
+
+                        insert_country += country_id + ',' + '\''+ country_name + '\'' + ') ON CONFLICT DO NOTHING'
+
+                        cursor.execute(insert_country)
+
+            
+            #print('finished loading referee data from file: ' + filename)
+
+    print('done insert_country2_data()')
 
 def insert_referee_data():
     directory = url + '/matches'
@@ -347,6 +422,7 @@ def insert_manager_data():
                                     manager_country_id = value[4].split(': ')[2]
                                     manager_country_id = manager_country_id.replace('\'', '')
 
+                                    #if no dob found input null
                                     if 'None' in manager_dob:
                                         insert_manager += manager_id + ',' + '\'' + manager_name + '\'' + ','  + '\'' + manager_nick + '\'' + ',' + 'NULL' + ',' +  manager_country_id + ',' + team_id + ') ON CONFLICT DO NOTHING'
                                     else:
@@ -364,9 +440,94 @@ def insert_manager_data():
 
     print('done insert_manager_data()')
 
-def insert_all_data():
+def insert_player_data():
+    directory = url + '/lineups'
+    #go through each file in lineups folder
+    for filename in os.listdir(directory):
+        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
 
+        grab_from_attribues = ["team_id","lineup"]
+
+        #if filename != '7298.json':
+        #    continue
+            
+        #print(foldername)
+        #print(filename)
+        #for each team in a json file
+        for team in individual_match_json:
+
+            #for each dictionary (match)
+            for attribute in grab_from_attribues:
+                #verify attribute is present
+                 
+
+
+                if attribute == "team_id":
+                    team_id = str(team[attribute])
+                    
+                if attribute == "lineup":
+                    lineup = str(team[attribute])
+                    lineup = lineup.split('}]}')
+
+                    #for each player
+                    for val in lineup:
+                        insert_players = 'INSERT INTO Players (id, name, nickname, jersey_number, country_id, team_id) VALUES ('
+
+                        if "," not in val:
+                            continue
+
+                        player_info = val.split(",")
+
+                        for player_data in player_info:
+                            #print(player_data)
+
+                            if "player_id" in player_data:
+                                player_id = player_data.split(': ')[1]
+                            
+                            if "player_name" in player_data:
+                                player_name = player_data.split('\': ')[1]
+                                player_name = player_name[1:-1]
+                                #print(player_name)
+
+                                player_name = player_name.replace('\'', '\'\'')
+
+
+                            if "player_nickname" in player_data:
+                                player_nick = player_data.split('\': ')[1]
+
+                                if 'None' not in player_nick:
+                                    player_nick = player_nick[1:-1]
+                                    player_nick = player_nick.replace('\'', '\'\'')
+                                    #print(player_nick)
+
+                            if "jersey_number" in player_data:
+                                jersey_number = player_data.split('\': ')[1]
+
+                            if "country" in player_data:
+                                country_id = player_data.split('id\': ')[1]
+
+                        #print(player_id)
+                        #print(player_name)
+                        #print(player_nick)
+                        #print(jersey_number)
+                        #print(country_id)
+                        #print(team_id)
+
+                        if 'None' in player_nick:
+                            insert_players += player_id + ',' + '\'' + player_name + '\'' + ',' + 'NULL' + ',' + jersey_number + ',' + country_id + ',' + team_id + ') ON CONFLICT DO NOTHING'
+                        else:
+                            insert_players += player_id + ',' + '\'' + player_name + '\'' + ',' + '\'' + player_nick + '\'' + ',' + jersey_number + ',' + country_id + ',' + team_id + ') ON CONFLICT DO NOTHING'
+
+                        cursor.execute(insert_players)
+
+            
+            #print('finished loading referee data from file: ' + filename)
+
+    print('done insert_player_data()')
+
+def insert_all_data():
     insert_country_data()
+    insert_country2_data()
     
     insert_referee_data()
     
@@ -375,6 +536,8 @@ def insert_all_data():
     insert_team_data()
 
     insert_manager_data()
+
+    insert_player_data()
 
 insert_all_data()
 conn.close()

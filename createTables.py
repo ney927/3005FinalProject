@@ -73,6 +73,21 @@ def create_manager_table():
     )''')
     print("create_manager_table() successful!")
 
+def create_player_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Players(
+                   id INT UNIQUE NOT NULL PRIMARY KEY,
+                   name VARCHAR(255) NOT NULL,
+                   nickname VARCHAR(255),
+                   jersey_number INT NOT NULL,
+                   country_id INT NOT NULL,
+                   team_id INT NOT NULL,
+                   FOREIGN KEY (country_id) REFERENCES Countrys (id),
+                   FOREIGN KEY (team_id) REFERENCES Teams (id)
+
+
+    )''')
+    print("create_player_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -84,6 +99,8 @@ def create_all_db_tables():
     create_team_table()
 
     create_manager_table()
+
+    create_player_table()
 
 
 create_all_db_tables()
