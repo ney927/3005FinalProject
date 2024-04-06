@@ -62,7 +62,14 @@ def create_matches_table():
                 referee_id INT,
                 PRIMARY KEY (match_id),
                 FOREIGN KEY (competition_id, season_id) references Competitions (competition_id, season_id)
-                        on delete set null
+                        on delete set null,
+                FOREIGN KEY (home_team_id) references Teams (id)
+                        on delete set null,
+                FOREIGN KEY (away_team_id) references Teams (id)
+                        on delete set null,
+                FOREIGN KEY (stadium_id) references Stadiums (id)
+                        on delete set null,
+                FOREIGN KEY (referee_id) references Referees (id)
     )''')
     print("create_matches_table() successful!")
 
@@ -83,6 +90,7 @@ def insert_competitions_data():
 
     # insert competition data
     cursor.execute(insert_competitions)
+    print("done insert_competitions_date()")
 
 
 def insert_matches_data():
@@ -95,8 +103,6 @@ def insert_matches_data():
             match_json = json.load(open(url+'/matches/'+season+'/'+match_id, 'r', encoding='utf-8'))
             for match in match_json:
                 insertMatch = '('
-                if match['competition']['competition_id'] == '1':
-                    print("Found a competition with id=1")
                 for attribute in match_attributes:
                     value = str(match[attribute])
                     insertMatch += '\'' + value + '\','
@@ -104,9 +110,6 @@ def insert_matches_data():
                 for attribute in match_attribute_fk:
                     if(attribute[0] in match):
                         value = str(match[attribute[0]][attribute[1]])
-                        if value == '9':
-                            print(match['match_id'], " has ", attribute[0], " =")
-                            print(insertMatch)
                         insertMatch += '\'' + value + '\','
                     else:
                         insertMatch += 'NULL,'
@@ -116,12 +119,17 @@ def insert_matches_data():
     insert_matches = insert_matches[:-1] + ''
 
     cursor.execute(insert_matches)  
+    print("done insert_matches_data()")
 
 
 
 # cursor.execute('DROP TABLE IF EXISTS Matches') #DELETES Matches TABLE
+# create_matches_table()
+# insert_matches_data()
+    
 # cursor.execute('DROP TABLE IF EXISTS Competitions') #DELETES Competitions TABLE
-
+# create_competitions_table()
+# insert_competitions_data()
 
 conn.close()
 
