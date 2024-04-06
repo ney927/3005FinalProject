@@ -525,6 +525,107 @@ def insert_player_data():
 
     print('done insert_player_data()')
 
+def insert_events_data():
+    directory = url + '/events'
+    #filenum = 0
+    #go through each file in lineups folder
+    for filename in os.listdir(directory):
+        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
+
+        grab_from_attribues = ["id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics"]
+
+        #if filename != '7298.json':
+        #    continue
+            
+        #print(foldername)
+        #print(filename)
+        #for each team in a json file
+        for event in individual_match_json:
+            insert_event = 'INSERT INTO Events (id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics) VALUES ('
+
+            #for each dictionary (match)
+            for attribute in grab_from_attribues:
+                #verify attribute is present
+                #if attribute in event:
+                #    print(attribute + '===' + str(event[attribute]))
+
+                # e shorthand for event
+                if attribute == 'id':
+                    e_id = str(event[attribute])
+
+                if attribute == 'index':
+                    e_index = str(event[attribute])
+
+                if attribute == 'period':
+                    e_period = str(event[attribute])
+
+                if attribute == 'timestamp':
+                    e_timestamp = str(event[attribute])
+
+                if attribute == 'minute':
+                    e_minute = str(event[attribute])
+
+                if attribute == 'second':
+                    e_second = str(event[attribute])
+
+                if attribute == 'type':
+                    e_type = str(event[attribute])
+                    e_type = e_type.split(': ')[2]
+                    e_type = e_type.replace('}', '')
+                    e_type = e_type[1:-1]
+
+                if attribute == 'possession':
+                    e_possession = str(event[attribute])
+
+                if attribute == 'possession_team':
+                    e_possession_team = str(event[attribute])
+                    e_possession_team = e_possession_team.split(',')[0].split(': ')[1]
+
+                if attribute == 'play_pattern':
+                    e_play_pattern = str(event[attribute])
+                    e_play_pattern = e_play_pattern.split(',')[1].split(': ')[1]
+                    e_play_pattern = e_play_pattern.replace('}', '')
+                    e_play_pattern = e_play_pattern[1:-1]
+
+                if attribute == 'team':
+                    e_team = str(event[attribute])
+                    e_team = e_team.split(',')[0].split(': ')[1]
+
+                if attribute == 'duration':
+                    if attribute in event:
+                        e_duration = str(event[attribute])
+                    else :
+                        e_duration = 'NULL'
+                    
+
+                if attribute == 'tactics':
+                    if attribute in event:
+                        e_tactics = str(event[attribute])
+                        e_tactics = e_tactics.split('\'')[3]
+                    else :
+                        e_tactics = 'NULL'
+            #print(e_id)
+            #print(e_index)
+            #print(e_period)
+            #print(e_timestamp)
+            #print(e_second)
+            #print(e_minute)
+            #print(e_type)
+            #print(e_possession)
+            #print(e_possession_team)
+            #print(e_team)
+            #print(e_duration)
+            #print(e_tactics)
+
+            insert_event += '\'' + e_id + '\'' + ',' + e_index + ',' + e_period + ',' + '\'' + e_timestamp + '\'' + ',' +  e_second + ',' + e_minute + ',' + '\'' +  e_type + '\'' + ',' +  e_possession + ',' +  e_possession_team + ',' + '\'' + e_play_pattern + '\'' + ',' +  e_team + ',' +  e_duration + ',' + '\'' + e_tactics + '\'' + ') ON CONFLICT DO NOTHING'
+
+            cursor.execute(insert_event)
+        #filenum += 1
+        #print("finished file" + str(filenum) + "/468")
+
+    print('done insert_events_data()')
+
+
 def insert_all_data():
     insert_country_data()
     insert_country2_data()
@@ -538,6 +639,8 @@ def insert_all_data():
     insert_manager_data()
 
     insert_player_data()
+
+    insert_events_data()
 
 insert_all_data()
 conn.close()

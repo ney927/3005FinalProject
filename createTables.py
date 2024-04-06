@@ -88,6 +88,27 @@ def create_player_table():
     )''')
     print("create_player_table() successful!")
 
+def create_events_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Events(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   index INT NOT NULL,
+                   period INT NOT NULL,
+                   timestamp TIME NOT NULL,
+                   minute INT NOT NULL,
+                   second INT NOT NULL,
+                   type VARCHAR(255) NOT NULL,
+                   possession INT NOT NULL,
+                   possesstion_team INT NOT NULL,
+                   play_pattern VARCHAR(255) NOT NULL,
+                   team INT NOT NULL,
+                   duration numeric,
+                   tactics VARCHAR(255),
+                   FOREIGN KEY (possesstion_team) REFERENCES Teams (id)
+
+
+    )''')
+    print("create_events_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -101,6 +122,8 @@ def create_all_db_tables():
     create_manager_table()
 
     create_player_table()
+
+    create_events_table()
 
 
 create_all_db_tables()
