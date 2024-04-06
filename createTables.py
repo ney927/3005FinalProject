@@ -109,6 +109,45 @@ def create_events_table():
     )''')
     print("create_events_table() successful!")
 
+def create_miscontrol_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Miscontrol(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   areial_won boolean NOT NULL,
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_miscontrol_table() successful!")
+
+def create_playerOff_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Player_Off(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   permanent boolean NOT NULL,
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_player_Off_table() successful!")
+
+def create_pressure_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Pressure(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   counterpress boolean NOT NULL,
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_pressure_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -124,6 +163,10 @@ def create_all_db_tables():
     create_player_table()
 
     create_events_table()
+    #Below are events
+    create_miscontrol_table()
+    create_playerOff_table()
+    create_pressure_table()
 
 
 create_all_db_tables()

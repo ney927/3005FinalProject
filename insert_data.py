@@ -534,15 +534,16 @@ def insert_events_data():
 
         grab_from_attribues = ["id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics"]
 
-        #if filename != '7298.json':
+        #if filename != '15946.json':
         #    continue
             
         #print(foldername)
         #print(filename)
-        #for each team in a json file
+        #for each event in a json file
         for event in individual_match_json:
             insert_event = 'INSERT INTO Events (id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics) VALUES ('
-
+            insert_miscontrol = ''
+            list_of_insertions = []
             #for each dictionary (match)
             for attribute in grab_from_attribues:
                 #verify attribute is present
@@ -551,7 +552,7 @@ def insert_events_data():
 
                 # e shorthand for event
                 if attribute == 'id':
-                    e_id = str(event[attribute])
+                    e_id = '\'' +  str(event[attribute]) + '\''
 
                 if attribute == 'index':
                     e_index = str(event[attribute])
@@ -560,7 +561,7 @@ def insert_events_data():
                     e_period = str(event[attribute])
 
                 if attribute == 'timestamp':
-                    e_timestamp = str(event[attribute])
+                    e_timestamp = '\'' + str(event[attribute]) + '\''
 
                 if attribute == 'minute':
                     e_minute = str(event[attribute])
@@ -569,23 +570,54 @@ def insert_events_data():
                     e_second = str(event[attribute])
 
                 if attribute == 'type':
-                    e_type = str(event[attribute])
-                    e_type = e_type.split(': ')[2]
-                    e_type = e_type.replace('}', '')
-                    e_type = e_type[1:-1]
+                    e_type = '\'' +  str(dict(event[attribute])["name"])  + '\''
+
+                    e_type_id = int(dict(event[attribute])["id"])
+                    #print(e_type)
+                    
+                    #Misconntrol id = 38
+                    if e_type_id == 38:
+                        #print("misscontrolli")
+                        if "miscontrol" in event:
+                            aerial = str(dict(event["miscontrol"])["aerial_won"]) 
+                            player_id =   str(dict(event["player"])["id"]) 
+                            insert_miscontrol = 'INSERT INTO Miscontrol (id, areial_won, player_id) VALUES (' + e_id + ',' + aerial + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            #cursor.execute(insert_miscontrol)
+                            list_of_insertions.append(insert_miscontrol)
+
+
+                        #print("ball receeeeeee")
+
+                    #Player Off id = 27
+                    if e_type_id == 27:
+                        #print(filename)
+                        if "player_off" in event:
+                            permanent = str(dict(event["player_off"])["permanent"]) 
+                            player_id =   str(dict(event["player"])["id"]) 
+                            insert_player_off = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + permanent + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            #cursor.execute(insert_miscontrol)
+                            list_of_insertions.append(insert_player_off)
+                    
+                    #Pressure id = 17
+                    if e_type_id == 17:
+                        #print("1")
+                        if "counterpress" in event:
+                            #print("2")
+                            counterpress = str(event["counterpress"]) 
+                            player_id =   str(dict(event["player"])["id"]) 
+                            insert_counterpress = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + counterpress + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            #cursor.execute(insert_miscontrol)
+                            list_of_insertions.append(insert_counterpress)
 
                 if attribute == 'possession':
                     e_possession = str(event[attribute])
 
                 if attribute == 'possession_team':
-                    e_possession_team = str(event[attribute])
-                    e_possession_team = e_possession_team.split(',')[0].split(': ')[1]
+                    e_possession_team = '\'' + str(dict(event[attribute])["id"]) + '\''
 
                 if attribute == 'play_pattern':
-                    e_play_pattern = str(event[attribute])
-                    e_play_pattern = e_play_pattern.split(',')[1].split(': ')[1]
-                    e_play_pattern = e_play_pattern.replace('}', '')
-                    e_play_pattern = e_play_pattern[1:-1]
+                    e_play_pattern = '\'' + str(dict(event[attribute])["name"]) + '\''
+                    
 
                 if attribute == 'team':
                     e_team = str(event[attribute])
@@ -599,9 +631,8 @@ def insert_events_data():
                     
 
                 if attribute == 'tactics':
-                    if attribute in event:
-                        e_tactics = str(event[attribute])
-                        e_tactics = e_tactics.split('\'')[3]
+                    if attribute in event and "name" in dict(event[attribute]):
+                        e_tactics = '\'' + str(dict(event[attribute])["name"]) + '\''
                     else :
                         e_tactics = 'NULL'
             #print(e_id)
@@ -617,9 +648,12 @@ def insert_events_data():
             #print(e_duration)
             #print(e_tactics)
 
-            insert_event += '\'' + e_id + '\'' + ',' + e_index + ',' + e_period + ',' + '\'' + e_timestamp + '\'' + ',' +  e_second + ',' + e_minute + ',' + '\'' +  e_type + '\'' + ',' +  e_possession + ',' +  e_possession_team + ',' + '\'' + e_play_pattern + '\'' + ',' +  e_team + ',' +  e_duration + ',' + '\'' + e_tactics + '\'' + ') ON CONFLICT DO NOTHING'
+            insert_event +=  e_id  + ',' + e_index + ',' + e_period + ',' + e_timestamp + ',' +  e_minute + ',' + e_second + ',' +  e_type + ',' +  e_possession + ',' +  e_possession_team + ',' +  e_play_pattern + ',' +  e_team + ',' +  e_duration + ',' + e_tactics + ') ON CONFLICT DO NOTHING'
+            
+            list_of_insertions.insert(0,insert_event)
 
-            cursor.execute(insert_event)
+            for insertion in list_of_insertions:
+                cursor.execute(insertion)
         #filenum += 1
         #print("finished file" + str(filenum) + "/468")
 
@@ -627,18 +661,18 @@ def insert_events_data():
 
 
 def insert_all_data():
-    insert_country_data()
-    insert_country2_data()
+    #insert_country_data()
+    #insert_country2_data()
     
-    insert_referee_data()
+    #insert_referee_data()
     
-    insert_stadium_data()
+    #insert_stadium_data()
 
-    insert_team_data()
+    #insert_team_data()
 
-    insert_manager_data()
+    #insert_manager_data()
 
-    insert_player_data()
+    #insert_player_data()
 
     insert_events_data()
 
