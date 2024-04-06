@@ -4,6 +4,7 @@ import json
 from db_secret import password
 
 #this file is to teardown all tables in the database
+    #note from neyha. ^ is this correct? seems like its creating tables but not deleting any?
 
 conn = psycopg2.connect(
     database = 'soccer',
