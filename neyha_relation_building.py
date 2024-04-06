@@ -27,7 +27,6 @@ def printRelation(relation):
         print(row)
 
 url = './data'
-competitions_json = json.load(open(url+'/competitions.json', 'r', encoding='utf-8'))
 
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
@@ -70,11 +69,13 @@ def create_matches_table():
                 FOREIGN KEY (stadium_id) references Stadiums (id)
                         on delete set null,
                 FOREIGN KEY (referee_id) references Referees (id)
+                        on delete set null
     )''')
     print("create_matches_table() successful!")
 
 
 def insert_competitions_data():
+    competitions_json = json.load(open(url+'/competitions.json', 'r', encoding='utf-8'))
     # generate the sql statement to insert competition data into the relation
     competition_attributes = ['competition_id', 'season_id', 'country_name', 'competition_name', 'competition_gender', 'competition_youth', 'competition_international', 'season_name']
     insert_competitions = 'INSERT INTO Competitions (competition_id, season_id, country_name, competition_name, competition_gender, competition_youth, competition_international, season_name) VALUES '
@@ -130,6 +131,57 @@ def insert_matches_data():
 # cursor.execute('DROP TABLE IF EXISTS Competitions') #DELETES Competitions TABLE
 # create_competitions_table()
 # insert_competitions_data()
+    
+
+#lineup stuff
+    
+def create_positions_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Positions(
+                id SERIAL,
+                position_id INT,
+                position_name VARCHAR(255),
+                from_time VARCHAR(255),
+                to_time VARCHAR(255),
+                from_period INT,
+                to_period INT,
+                start_reason VARCHAR(255),
+                end_reason VARCHAR(255),
+                player_id INT,
+                PRIMARY KEY (id),
+                FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create_positions_table() successful!")
+
+
+def insert_position_data():
+    position_attributes = ['position_id', 'position', 'from', 'to', 'from_period', 'to_period', 'start_reason', 'end_reason']
+    insert_positions = 'INSERT INTO Positions (position_id, position_name, from_time, to_time, from_period, to_period, start_reason, end_reason, player_id) VALUES '
+    for matchid in os.listdir(url+"/lineups"):
+        lineups_json = json.load(open(url+"/lineups/"+matchid, "r", encoding="utf-8"))
+        for lineup in lineups_json:
+            for player in lineup['lineup']:
+                for position in player['positions']:
+                    insertPos = '(' 
+                    for attribute in position_attributes:
+                        value = str(position[attribute])
+                        value = value.replace('\'', '\'\'')
+                        if value == 'None':
+                            insertPos += 'NULL,'    
+                        else:
+                            insertPos += '\'' + value + '\','    
+                    insertPos += str(player['player_id']) + '),\n'
+                    insert_positions += insertPos
+
+    insert_positions = insert_positions[:-2] + ''
+    cursor.execute(insert_positions)
+    # print(insert_positions)
+    print("done insert_positions_date()")
+
+
+# cursor.execute('DROP TABLE IF EXISTS Positions') #DELETES Positions TABLE
+# create_positions_table()
+# insert_position_data()
 
 conn.close()
 
