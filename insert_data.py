@@ -595,7 +595,6 @@ def insert_events_data():
                             permanent = str(dict(event["player_off"])["permanent"]) 
                             player_id =   str(dict(event["player"])["id"]) 
                             insert_player_off = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + permanent + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            #cursor.execute(insert_miscontrol)
                             list_of_insertions.append(insert_player_off)
                     
                     #Pressure id = 17
@@ -606,8 +605,17 @@ def insert_events_data():
                             counterpress = str(event["counterpress"]) 
                             player_id =   str(dict(event["player"])["id"]) 
                             insert_counterpress = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + counterpress + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            #cursor.execute(insert_miscontrol)
                             list_of_insertions.append(insert_counterpress)
+
+                    #Substitution id = 19
+                    if e_type_id == 19:
+                        if "substitution" in event:
+                            #print("2")
+                            replacement_id = str(dict(dict(event["substitution"])["replacement"])["id"]) 
+                            outcome = '\'' +  str(dict(dict(event["substitution"])["outcome"])["name"]) + '\''
+                            player_id =   str(dict(event["player"])["id"]) 
+                            insert_substitution = 'INSERT INTO Substitution(id, replacement_player_id, outcome, player_id) VALUES (' + e_id + ',' + replacement_id + ',' + outcome + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            list_of_insertions.append(insert_substitution)
 
                 if attribute == 'possession':
                     e_possession = str(event[attribute])

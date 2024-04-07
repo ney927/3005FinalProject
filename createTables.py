@@ -148,6 +148,21 @@ def create_pressure_table():
     )''')
     print("create_pressure_table() successful!")
 
+def create_sub_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Substitution(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   replacement_player_id INT NOT NULL,
+                   outcome VARCHAR(255) NOT NULL,
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id),
+                   FOREIGN KEY (replacement_player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_sub_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -167,6 +182,7 @@ def create_all_db_tables():
     create_miscontrol_table()
     create_playerOff_table()
     create_pressure_table()
+    create_sub_table()
 
 
 create_all_db_tables()
