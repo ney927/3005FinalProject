@@ -183,5 +183,6 @@ def insert_position_data():
 # create_positions_table()
 # insert_position_data()
 
-conn.close()
+if __name__ == "__main__":
+    conn.close()
 

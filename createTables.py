@@ -2,7 +2,7 @@ import psycopg2
 import json
 
 from db_secret import password
-
+from neyha_relation_building import*
 #this file is to teardown all tables in the database
     #note from neyha. ^ is this correct? seems like its creating tables but not deleting any?
 
@@ -92,6 +92,7 @@ def create_player_table():
 def create_events_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Events(
                    id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   match_id INT NOT NULL,
                    index INT NOT NULL,
                    period INT NOT NULL,
                    timestamp TIME NOT NULL,
@@ -104,7 +105,9 @@ def create_events_table():
                    team INT NOT NULL,
                    duration numeric,
                    tactics VARCHAR(255),
-                   FOREIGN KEY (possesstion_team) REFERENCES Teams (id)
+                   location numeric[],
+                   FOREIGN KEY (possesstion_team) REFERENCES Teams (id),
+                   FOREIGN KEY (match_id) REFERENCES Matches (match_id)
 
 
     )''')
@@ -164,6 +167,61 @@ def create_sub_table():
     )''')
     print("create_sub_table() successful!")
 
+def create_shots_table():
+    #change freeze frame
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Shots(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   key_pass_id VARCHAR(255),
+                   end_location numeric[] NOT NULL,
+                   areial_won boolean,
+                   follows_dribble boolean,
+                   first_time boolean,
+                   freeze_frame VARCHAR(255),
+                   open_goal boolean,
+                   statsbomb_xg numeric NOT NULL,
+                   deflected boolean,
+                   technique VARCHAR(255) NOT NULL,
+                   body_part VARCHAR(255) NOT NULL,
+                   type VARCHAR(255) NOT NULL,
+                   outcome VARCHAR(255) NOT NULL,
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_shots_table() successful!")
+
+def create_pass_table():
+    #cross needed to be changed to cross_pass
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Pass(
+                   id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   assisted_shot_id VARCHAR(255),
+                   recipient_id INT,
+                   legnth numeric NOT NULL,
+                   angle numeric NOT NULL,
+                   height VARCHAR(255) NOT NULL,
+                   end_location numeric[] NOT NULL,
+                   backheel boolean,
+                   deflected boolean,
+                   miscommunication boolean,
+                   cross_pass boolean,
+                   cut_back boolean,
+                   switch boolean,
+                   shot_assist boolean,
+                   goal_assist boolean,
+                   body_part VARCHAR(255),
+                   type VARCHAR(255),
+                   outcome VARCHAR(255),
+                   technique VARCHAR(255),
+                   player_id INT NOT NULL,
+                   FOREIGN KEY (id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+    )''')
+    print("create_pass_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -178,12 +236,19 @@ def create_all_db_tables():
 
     create_player_table()
 
+    create_competitions_table()
+    create_matches_table()
+    create_positions_table()
+
     create_events_table()
     #Below are events
     create_miscontrol_table()
     create_playerOff_table()
     create_pressure_table()
     create_sub_table()
+    #**
+    create_shots_table()
+    create_pass_table()
 
 
 create_all_db_tables()
