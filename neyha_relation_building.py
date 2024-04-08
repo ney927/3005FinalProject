@@ -395,8 +395,6 @@ def create_event_type_tables():
     
     cursor.execute('''CREATE TABLE IF NOT EXISTS Half_End(
                    id VARCHAR(255) NOT NULL UNIQUE,
-                   player_id INT NOT NULL,
-                   position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
@@ -408,8 +406,6 @@ def create_event_type_tables():
     
     cursor.execute('''CREATE TABLE IF NOT EXISTS Half_Start(
                    id VARCHAR(255) NOT NULL UNIQUE,
-                   player_id INT NOT NULL,
-                   position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
@@ -451,39 +447,80 @@ def create_event_type_tables():
 def insert_events_type_data():
     directory = url + '/events'
     filenum = 0
-    # insert_ball_receipt = "INSERT INTO Ball_Receipt (id, player_id, position_name, season_id) VALUES "
-    # insert_carry = "INSERT INTO Carry(id, player_id, position_id, season_id) VALUES "
+    insert_ball_receipt = "INSERT INTO Ball_Receipt (id, player_id, position_name, season_id) VALUES "
+    insert_ball_recovery = "INSERT INTO Ball_Recovery (id, player_id, position_name, season_id) VALUES "
+    insert_block = "INSERT INTO block (id, player_id, position_name, season_id) VALUES "
+    insert_injury_stoppage = "INSERT INTO injury_stoppage (id, player_id, position_name, season_id) VALUES "
+    insert_5050 = "INSERT INTO event_5050 (id, player_id, position_name, season_id) VALUES "
+    insert_bad_behaviour = "INSERT INTO bad_behaviour (id, player_id, position_name, season_id) VALUES "
+    insert_dribbled_past = "INSERT INTO dribbled_past (id, player_id, position_name, season_id) VALUES "
+
+
+    insert_half_end = "INSERT INTO half_end (id, season_id) VALUES "
+    insert_half_start = "INSERT INTO half_start (id, season_id) VALUES "
     #go through each file in lineups folder
     for filename in os.listdir(directory):
         individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
         cursor.execute("SELECT season_id FROM matches WHERE matches.match_id="+filename[:-5]+";")
         season_id = str(cursor.fetchone()[0])
-
+    
         #for each event in a json file
         for event in individual_match_json:
             type = event['type']['name']
+            basic_insert = ""
+            if 'player' in event:
+                basic_insert = "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
+            
+                
+            "Ball Receipt*"
+            if type == "Ball Receipt*":
+                insert_ball_receipt += "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
 
-            # "Ball Receipt*"
-            # if type == "Ball Receipt*":
-            #     insert_ball_receipt += "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
+            # "Ball Recovery"
+            if type == "Ball Recovery":  
+                insert_ball_recovery += basic_insert
+
+            # "Block"
+            elif type == "Block":
+                insert_block += basic_insert
+            
+            # "Dribbled Past"
+            elif type == "Dribbled Past":
+                insert_dribbled_past += basic_insert
+
+            
+            # "Injury Stoppage"
+            elif type == "Injury Stoppage":
+                insert_injury_stoppage += basic_insert
+                
+            # "50/50"
+            elif type == "50/50":
+                insert_5050 += basic_insert
+            
+            # "Bad Behaviour"
+            elif type == "Bad Behaviour":
+                insert_bad_behaviour += basic_insert
+                
+
+            # # "Half End"
+            # elif type == "Half End":
+            #     insert_half_end += basic_insert
+            
+            # # "Half Start"
+            # elif type == "Half Start":
+            #     insert_half_start += basic_insert
+
+
 
             # # "Carry"
-            # elif type == "Carry":
-
-            # # "Ball Recovery"
-            # elif type == "Ball Recovery":
-
-            # # "Block"
-            # elif type == "Block":
-
+            # if type == "Carry":
+            #     insert_carry += 
+                
             # # "Clearance"
             # elif type == "Clearance":
 
             # # "Dribble"
             # elif type == "Dribble":
-            
-            # # "Dribbled Past"
-            # elif type == "Dribbled Past":
             
             # # "Duel"
             # elif type == "Duel":
@@ -497,31 +534,38 @@ def insert_events_type_data():
             # # "Goal Keeper"
             # elif type == "Goal Keeper":
             
-            # # "Half End"
-            # elif type == "Half End":
-            
-            # # "Half Start"
-            # elif type == "Half Start":
-            
-            # # "Injury Stoppage"
-            # elif type == "Injury Stoppage":
-            
             # # "Interception"
             # elif type == "Interception":
             
-            # # "50/50"
-            # elif type == "50/50":
-            
-            # # "Bad Behaviour"
-            # elif type == "Bad Behaviour":
 
         filenum += 1
         print("finished file" + str(filenum) + "/468")
 
-    # insert_ball_receipt = insert_ball_receipt[:-2] + ''
-    # cursor.execute(insert_ball_receipt)
-    print('done insert_events_data()')
+    insert_ball_receipt = insert_ball_receipt[:-2] + ''
+    cursor.execute(insert_ball_receipt)
+    insert_ball_recovery = insert_ball_recovery[:-2] + ''
+    cursor.execute(insert_ball_recovery)
+    print('done insert ball recovery')
+    insert_block = insert_block[:-2] + ''
+    cursor.execute(insert_block)
+    print('done insert block')
+    insert_dribbled_past = insert_dribbled_past[:-2] + ''
+    cursor.execute(insert_dribbled_past)
+    print('done insert dribbled past')
+    insert_injury_stoppage = insert_injury_stoppage[:-2] + ''
+    cursor.execute(insert_injury_stoppage)
+    print('done insert injury stoppage')
+    insert_5050 = insert_5050[:-2] + ''
+    cursor.execute(insert_5050)
+    print('done insert 5050')
+    insert_bad_behaviour = insert_bad_behaviour[:-2] + ''
+    cursor.execute(insert_bad_behaviour)
+    print('done insert bad behaviour')
             
+    # cursor.execute(insert_half_end)
+    # print('done insert half end')
+    # cursor.execute(insert_half_start)
+    # print('done insert half start')
 
 insert_events_type_data()
 
