@@ -31,14 +31,14 @@ url = './data'
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Competitions(
-                competition_id INT NOT NULL,
+                competition_id INT NOT NULL UNIQUE,
                 season_id INT NOT NULL,
-                country_name VARCHAR(255),
-                competition_name VARCHAR(255),
-                competition_gender VARCHAR(255),
-                competition_youth BOOL,
-                competition_international BOOL,
-                season_name VARCHAR(255),
+                country_name VARCHAR(255) NOT NULL ,
+                competition_name VARCHAR(255) NOT NULL ,
+                competition_gender VARCHAR(255) NOT NULL ,
+                competition_youth BOOL NOT NULL ,
+                competition_international BOOL NOT NULL ,
+                season_name VARCHAR(255) NOT NULL ,
                 PRIMARY KEY (competition_id, season_id)
     )''')
     print("create_competitions_table() successful!")
@@ -137,16 +137,17 @@ def insert_matches_data():
     
 def create_positions_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Positions(
-                id SERIAL,
-                position_id INT,
-                position_name VARCHAR(255),
+                id SERIAL NOT NULL UNIQUE,
+                position_id INT NOT NULL,
+                position_name VARCHAR(255) NOT NULL,
                 from_time VARCHAR(255),
                 to_time VARCHAR(255),
                 from_period INT,
                 to_period INT,
                 start_reason VARCHAR(255),
                 end_reason VARCHAR(255),
-                player_id INT,
+                player_id INT NOT NULL,
+                match_id INT NOT NULL,
                 PRIMARY KEY (id),
                 FOREIGN KEY (player_id) references Players (id)
                         on delete set null
@@ -154,7 +155,7 @@ def create_positions_table():
     print("create_positions_table() successful!")
 
 
-def insert_position_data():
+def insert_positions_data():
     position_attributes = ['position_id', 'position', 'from', 'to', 'from_period', 'to_period', 'start_reason', 'end_reason']
     insert_positions = 'INSERT INTO Positions (position_id, position_name, from_time, to_time, from_period, to_period, start_reason, end_reason, player_id) VALUES '
     for matchid in os.listdir(url+"/lineups"):
@@ -170,10 +171,10 @@ def insert_position_data():
                             insertPos += 'NULL,'    
                         else:
                             insertPos += '\'' + value + '\','    
-                    insertPos += str(player['player_id']) + '),\n'
+                    insertPos += str(player['player_id']) + ','+ str(matchid) + '),'
                     insert_positions += insertPos
 
-    insert_positions = insert_positions[:-2] + ''
+    insert_positions = insert_positions[:-1] + ''
     cursor.execute(insert_positions)
     # print(insert_positions)
     print("done insert_positions_date()")
@@ -181,7 +182,438 @@ def insert_position_data():
 
 # cursor.execute('DROP TABLE IF EXISTS Positions') #DELETES Positions TABLE
 # create_positions_table()
-# insert_position_data()
+# insert_positions_data()
+    
+
+
+#event stuff
+#neyha
+# "50/50"
+# "Bad Behaviour"
+# "Ball Receipt*"
+# "Ball Recovery"
+# "Block"
+# "Carry"
+# "Clearance"
+# "Dribble"
+# "Dribbled Past"
+# "Duel"
+# "Foul Committed"
+# "Foul Won"
+# "Goal Keeper"
+# "Half End"
+# "Half Start"
+# "Injury Stoppage"
+# "Interception"
+    
+def create_event_type_tables():
+    # "50/50", "Bad Behaviour", "Ball Receipt*", "Ball Recovery", "Block", "Carry", "Clearance", "Dribble", "Dribbled Past"
+    # "Duel", "Foul Committed", "Foul Won", "Goal Keeper", "Half End", "Half Start", "Injury Stoppage", "Interception"
+    cursor.execute('''CREATE TABLE IF NOT EXISTS event_5050(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create 5050 table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Bad_Behaviour (
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Bad_Behaviour table was successful!")
+    
+    cursor.execute(''' CREATE TABLE IF NOT EXISTS Ball_Receipt (
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')    
+    print("create Ball_Receipt table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Ball_Recovery(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Ball_Recovery table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Block(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Block table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Carry(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   end_location_x FLOAT(1) NOT NULL,
+                   end_location_y FLOAT(1) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Carry table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Clearance(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   under_pressure BOOL NOT NULL,
+                   left_foot BOOL NOT NULL,
+                   body_part VARCHAR(255) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Clearance table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Dribble(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   nutmeg BOOL NOT NULL,
+                   outcome VARCHAR(255) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Dribble table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Dribbled_Past(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Dribbled_Past table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Duel(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   type VARCHAR(255) NOT NULL,
+                   outcome VARCHAR(255) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Duel table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Foul_Committed(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   counterpress BOOL NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Foul_Committed table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Foul_Won(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   counterpress BOOL NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Foul_Won table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Goal_Keeper(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   end_location_x FLOAT(1) NOT NULL,
+                   end_location_y FLOAT(1) NOT NULL,
+                   goal_position VARCHAR(255) NOT NULL,
+                   type VARCHAR(255) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Goal_Keeper table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Half_End(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Half_End table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Half_Start(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Half_Start table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Injury_Stoppage(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Injury_Stoppage table was successful!")
+    
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Interception(
+                   id VARCHAR(255) NOT NULL UNIQUE,
+                   player_id INT NOT NULL,
+                   position_name VARCHAR(255) NOT NULL,
+                   season_id INT NOT NULL,
+                   outcome VARCHAR(255) NOT NULL,
+                   PRIMARY KEY (id),
+                   FOREIGN KEY (id) references Events (id)
+                        on delete set null,
+                   FOREIGN KEY (player_id) references Players (id)
+                        on delete set null
+    )''')
+    print("create Interception table was successful!")
+
+
+    
+def insert_events_type_data():
+    directory = url + '/events'
+    filenum = 0
+    # insert_ball_receipt = "INSERT INTO Ball_Receipt (id, player_id, position_name, season_id) VALUES "
+    # insert_carry = "INSERT INTO Carry(id, player_id, position_id, season_id) VALUES "
+    #go through each file in lineups folder
+    for filename in os.listdir(directory):
+        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
+        cursor.execute("SELECT season_id FROM matches WHERE matches.match_id="+filename[:-5]+";")
+        season_id = str(cursor.fetchone()[0])
+
+        #for each event in a json file
+        for event in individual_match_json:
+            type = event['type']['name']
+
+            # "Ball Receipt*"
+            # if type == "Ball Receipt*":
+            #     insert_ball_receipt += "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
+
+            # # "Carry"
+            # elif type == "Carry":
+
+            # # "Ball Recovery"
+            # elif type == "Ball Recovery":
+
+            # # "Block"
+            # elif type == "Block":
+
+            # # "Clearance"
+            # elif type == "Clearance":
+
+            # # "Dribble"
+            # elif type == "Dribble":
+            
+            # # "Dribbled Past"
+            # elif type == "Dribbled Past":
+            
+            # # "Duel"
+            # elif type == "Duel":
+            
+            # # "Foul Committed"
+            # elif type == "Foul Committed":
+            
+            # # "Foul Won"
+            # elif type == "Foul Won":
+            
+            # # "Goal Keeper"
+            # elif type == "Goal Keeper":
+            
+            # # "Half End"
+            # elif type == "Half End":
+            
+            # # "Half Start"
+            # elif type == "Half Start":
+            
+            # # "Injury Stoppage"
+            # elif type == "Injury Stoppage":
+            
+            # # "Interception"
+            # elif type == "Interception":
+            
+            # # "50/50"
+            # elif type == "50/50":
+            
+            # # "Bad Behaviour"
+            # elif type == "Bad Behaviour":
+
+        filenum += 1
+        print("finished file" + str(filenum) + "/468")
+
+    # insert_ball_receipt = insert_ball_receipt[:-2] + ''
+    # cursor.execute(insert_ball_receipt)
+    print('done insert_events_data()')
+            
+
+insert_events_type_data()
+
+def insert_events_data():
+    directory = url + '/events'
+    filenum = 0
+    #go through each file in lineups folder
+    for filename in os.listdir(directory):
+        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
+
+        grab_from_attribues = ["id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics"]
+
+        #if filename != '7298.json':
+        #    continue
+
+        #print(foldername)
+        #print(filename)
+        #for each team in a json file
+        for event in individual_match_json:
+            insert_event = 'INSERT INTO Events (id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics) VALUES ('
+
+            #for each dictionary (match)
+            for attribute in grab_from_attribues:
+                #verify attribute is present
+                #if attribute in event:
+                #    print(attribute + '===' + str(event[attribute]))
+
+                # e shorthand for event
+                if attribute == 'id':
+                    e_id = str(event[attribute])
+
+                if attribute == 'index':
+                    e_index = str(event[attribute])
+
+                if attribute == 'period':
+                    e_period = str(event[attribute])
+
+                if attribute == 'timestamp':
+                    e_timestamp = str(event[attribute])
+
+                if attribute == 'minute':
+                    e_minute = str(event[attribute])
+
+                if attribute == 'second':
+                    e_second = str(event[attribute])
+
+                if attribute == 'type':
+                    e_type = str(event[attribute])
+                    e_type = e_type.split(': ')[2]
+                    e_type = e_type.replace('}', '')
+                    e_type = e_type[1:-1]
+
+                if attribute == 'possession':
+                    e_possession = str(event[attribute])
+
+                if attribute == 'possession_team':
+                    e_possession_team = str(event[attribute])
+                    e_possession_team = e_possession_team.split(',')[0].split(': ')[1]
+
+                if attribute == 'play_pattern':
+                    e_play_pattern = str(event[attribute])
+                    e_play_pattern = e_play_pattern.split(',')[1].split(': ')[1]
+                    e_play_pattern = e_play_pattern.replace('}', '')
+                    e_play_pattern = e_play_pattern[1:-1]
+
+                if attribute == 'team':
+                    e_team = str(event[attribute])
+                    e_team = e_team.split(',')[0].split(': ')[1]
+
+                if attribute == 'duration':
+                    if attribute in event:
+                        e_duration = str(event[attribute])
+                    else :
+                        e_duration = 'NULL'
+
+
+                if attribute == 'tactics':
+                    if attribute in event:
+                        e_tactics = str(event[attribute])
+                        e_tactics = e_tactics.split('\'')[3]
+                    else :
+                        e_tactics = 'NULL'
+
+            insert_event += '\'' + e_id + '\'' + ',' + e_index + ',' + e_period + ',' + '\'' + e_timestamp + '\'' + ',' +  e_second + ',' + e_minute + ',' + '\'' +  e_type + '\'' + ',' +  e_possession + ',' +  e_possession_team + ',' + '\'' + e_play_pattern + '\'' + ',' +  e_team + ',' +  e_duration + ',' + '\'' + e_tactics + '\'' + ') ON CONFLICT DO NOTHING'
+
+            cursor.execute(insert_event)
+        filenum += 1
+        print("finished file" + str(filenum) + "/468")
+
+    print('done insert_events_data()')
+
+
 
 if __name__ == "__main__":
     conn.close()
