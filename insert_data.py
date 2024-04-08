@@ -5,6 +5,7 @@ import re
 import datetime
 
 from db_secret import password
+from neyha_relation_building import*
 
 #this file is to insert data into the made tables
 
@@ -527,12 +528,12 @@ def insert_player_data():
 
 def insert_events_data():
     directory = url + '/events'
-    #filenum = 0
+    filenum = 0
     #go through each file in lineups folder
     for filename in os.listdir(directory):
         individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
 
-        grab_from_attribues = ["id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics"]
+        grab_from_attribues = ["id","match_id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics","location"]
 
         #if filename != '15946.json':
         #    continue
@@ -541,7 +542,7 @@ def insert_events_data():
         #print(filename)
         #for each event in a json file
         for event in individual_match_json:
-            insert_event = 'INSERT INTO Events (id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics) VALUES ('
+            insert_event = 'INSERT INTO Events (id, match_id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics, location) VALUES ('
             insert_miscontrol = ''
             list_of_insertions = []
             #for each dictionary (match)
@@ -612,10 +613,150 @@ def insert_events_data():
                         if "substitution" in event:
                             #print("2")
                             replacement_id = str(dict(dict(event["substitution"])["replacement"])["id"]) 
-                            outcome = '\'' +  str(dict(dict(event["substitution"])["outcome"])["name"]) + '\''
+                            sub_outcome = '\'' +  str(dict(dict(event["substitution"])["outcome"])["name"]) + '\''
                             player_id =   str(dict(event["player"])["id"]) 
-                            insert_substitution = 'INSERT INTO Substitution(id, replacement_player_id, outcome, player_id) VALUES (' + e_id + ',' + replacement_id + ',' + outcome + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            insert_substitution = 'INSERT INTO Substitution(id, replacement_player_id, outcome, player_id) VALUES (' + e_id + ',' + replacement_id + ',' + sub_outcome + ',' + player_id + ') ON CONFLICT DO NOTHING'
                             list_of_insertions.append(insert_substitution)
+
+                    #Shots id = 16 
+                    if e_type_id == 16:
+                        if "shot" in event:
+                            if "key_pass_id" in dict(event["shot"]):
+                                key_pass_id = '\''+ str((dict(event["shot"])["key_pass_id"])) + '\''
+                            else:
+                                 key_pass_id = 'NULL'
+                            
+                            shot_end_location = 'ARRAY' + str(dict(event["shot"])["end_location"])
+                            if "areial_won" in dict(event["shot"]):
+                                areial_won = str((dict(event["shot"])["areial_won"]))
+                            else:
+                                 areial_won = 'NULL'
+
+                            if "follows_dribble" in dict(event["shot"]):
+                                follows_dribble = str((dict(event["shot"])["follows_dribble"]))
+                            else:
+                                 follows_dribble = 'NULL'
+
+                            if "first_time" in dict(event["shot"]):
+                                first_time = str((dict(event["shot"])["first_time"]))
+                            else:
+                                first_time = 'NULL'
+
+                            if "freeze_frame" in dict(event["shot"]):
+                                #change
+                                freeze_frame = 'NULL'
+                                #'\"' + str((dict(event["shot"])["freeze_frame"])) + '\"'
+                            else:
+                                freeze_frame = 'NULL'
+
+                            if "open_goal" in dict(event["shot"]):
+                                open_goal = str((dict(event["shot"])["open_goal"]))
+                            else:
+                                open_goal = 'NULL'
+
+                            statsbomb_xg = str((dict(event["shot"])["statsbomb_xg"])) 
+
+                            if "deflected" in dict(event["shot"]):
+                                shot_deflected = str((dict(event["shot"])["deflected"]))
+                            else:
+                                shot_deflected = 'NULL'
+
+                            technique = '\'' + str(dict(dict(event["shot"])["technique"])["name"]) + '\''
+                            
+                            body_part = '\'' + str(dict(dict(event["shot"])["body_part"])["name"]) + '\''
+                            
+                            shot_type = '\'' + str(dict(dict(event["shot"])["type"])["name"]) + '\''
+
+                            shot_outcome = '\'' + str(dict(dict(event["shot"])["outcome"])["name"]) + '\''
+
+                            player_id =   str(dict(event["player"])["id"]) 
+
+                            insert_shot = 'INSERT INTO Shots(id, key_pass_id, end_location, areial_won, follows_dribble, first_time, freeze_frame, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id) VALUES (' + e_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  freeze_frame + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ') ON CONFLICT DO NOTHING'
+                            list_of_insertions.append(insert_shot)
+
+                    #Pass id = 30
+                    if e_type_id == 30:
+                        if "pass" in event:
+                            if "assisted_shot_id" in dict(event["pass"]):
+                                assisted_shot_id = '\''+ str((dict(event["pass"])["assisted_shot_id"])) + '\''
+                            else:
+                                 assisted_shot_id = 'NULL'
+
+                            if "recipient_id" in dict(event["pass"]):
+                                recipient_id = str((dict(event["pass"])["recipient_id"]))
+                            else:
+                                 recipient_id = 'NULL'
+
+                            p_length = str((dict(event["pass"])["length"])) 
+                            p_angle = str((dict(event["pass"])["angle"]))
+                            p_height = '\'' + str(dict(dict(event["pass"])["height"])["name"]) + '\''
+                            pass_end_location = 'ARRAY' + str(dict(event["pass"])["end_location"])
+
+                            if "backheel" in dict(event["pass"]):
+                                backheel = str((dict(event["pass"])["backheel"]))
+                            else:
+                                 backheel = 'NULL'
+                                
+                            if "deflected" in dict(event["pass"]):
+                                pass_deflected = str((dict(event["pass"])["deflected"]))
+                            else:
+                                pass_deflected = 'NULL'
+
+                            if "miscommunication" in dict(event["pass"]):
+                                miscommunication = str((dict(event["pass"])["miscommunication"]))
+                            else:
+                                miscommunication = 'NULL'
+
+                            if "cross" in dict(event["pass"]):
+                                cross = str((dict(event["pass"])["cross"]))
+                            else:
+                                cross = 'NULL'
+
+                            if "cut_back" in dict(event["pass"]):
+                                cut_back = str((dict(event["pass"])["cut_back"]))
+                            else:
+                                cut_back = 'NULL'
+
+                            if "switch" in dict(event["pass"]):
+                                switch = str((dict(event["pass"])["switch"]))
+                            else:
+                                switch = 'NULL'
+
+                            if "shot_assist" in dict(event["pass"]):
+                                shot_assist = str((dict(event["pass"])["shot_assist"]))
+                            else:
+                                shot_assist = 'NULL'
+
+                            if "goal_assist" in dict(event["pass"]):
+                                goal_assist = str((dict(event["pass"])["goal_assist"]))
+                            else:
+                                goal_assist = 'NULL'
+
+                            if "body_part" in dict(event["pass"]):
+                                pass_body_part = '\'' + str(dict(dict(event["pass"])["body_part"])["name"]) + '\''
+                            else:
+                                pass_body_part = 'NULL'
+
+                            if "type" in dict(event["pass"]):
+                                pass_type = '\'' + str(dict(dict(event["pass"])["type"])["name"]) + '\''
+                            else:
+                                pass_type = 'NULL'
+
+                            if "outcome" in dict(event["pass"]):
+                                p_outcome = '\'' + str(dict(dict(event["pass"])["outcome"])["name"]) + '\''
+                            else:
+                                p_outcome = 'NULL'
+
+                            if "technique" in dict(event["pass"]):
+                                p_technique = '\'' + str(dict(dict(event["pass"])["technique"])["name"]) + '\''
+                            else:
+                                p_technique = 'NULL'
+
+                            player_id =   str(dict(event["player"])["id"]) 
+
+                            insert_pass = 'INSERT INTO Pass(id, assisted_shot_id, recipient_id, legnth, angle, height, end_location, backheel, deflected, miscommunication, cross_pass, cut_back, switch, shot_assist, goal_assist, body_part, type, outcome, technique, player_id) VALUES (' + e_id + ',' + assisted_shot_id + ',' +  recipient_id + ',' +  p_length + ',' +  p_angle + ',' +  p_height + ',' +  pass_end_location + ',' +  backheel + ',' +  pass_deflected + ',' +  miscommunication + ',' +  cross + ',' + cut_back + ',' +  switch + ',' +  shot_assist + ',' + goal_assist + ',' + pass_body_part + ',' + pass_type + ',' + p_outcome + ',' + p_technique + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            list_of_insertions.append(insert_pass)
+
 
                 if attribute == 'possession':
                     e_possession = str(event[attribute])
@@ -643,6 +784,15 @@ def insert_events_data():
                         e_tactics = '\'' + str(dict(event[attribute])["name"]) + '\''
                     else :
                         e_tactics = 'NULL'
+
+                if attribute == 'location':
+                    if attribute in event:
+                        location = 'ARRAY' + str(event[attribute])
+                    else :
+                        location = 'NULL'
+
+                if attribute == 'match_id':
+                    match_id = str(filename).replace('.json', '')
             #print(e_id)
             #print(e_index)
             #print(e_period)
@@ -656,31 +806,37 @@ def insert_events_data():
             #print(e_duration)
             #print(e_tactics)
 
-            insert_event +=  e_id  + ',' + e_index + ',' + e_period + ',' + e_timestamp + ',' +  e_minute + ',' + e_second + ',' +  e_type + ',' +  e_possession + ',' +  e_possession_team + ',' +  e_play_pattern + ',' +  e_team + ',' +  e_duration + ',' + e_tactics + ') ON CONFLICT DO NOTHING'
+            insert_event +=  e_id  + ',' + match_id + ','+ e_index + ',' + e_period + ',' + e_timestamp + ',' +  e_minute + ',' + e_second + ',' +  e_type + ',' +  e_possession + ',' +  e_possession_team + ',' +  e_play_pattern + ',' +  e_team + ',' +  e_duration + ',' + e_tactics + ',' + location + ') ON CONFLICT DO NOTHING'
             
             list_of_insertions.insert(0,insert_event)
 
             for insertion in list_of_insertions:
                 cursor.execute(insertion)
-        #filenum += 1
-        #print("finished file" + str(filenum) + "/468")
+        filenum += 1
+        print("finished file " + filename + ', ' + str(filenum) + "/468")
 
     print('done insert_events_data()')
 
 
 def insert_all_data():
-    #insert_country_data()
-    #insert_country2_data()
+    insert_country_data()
+    insert_country2_data()
+
+    #ney
+    insert_competitions_data()
     
-    #insert_referee_data()
+    insert_referee_data()
     
-    #insert_stadium_data()
+    insert_stadium_data()
 
-    #insert_team_data()
+    insert_team_data()
 
-    #insert_manager_data()
+    insert_manager_data()
 
-    #insert_player_data()
+    insert_player_data()
+
+    #ney
+    insert_matches_data()
 
     insert_events_data()
 

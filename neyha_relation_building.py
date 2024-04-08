@@ -661,5 +661,6 @@ def insert_events_data():
 
 
 
-conn.close()
+if __name__ == "__main__":
+    conn.close()
 
