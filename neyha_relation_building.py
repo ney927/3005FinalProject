@@ -398,8 +398,6 @@ def create_event_type_tables():
                    season_id INT NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
-                        on delete set null,
-                   FOREIGN KEY (player_id) references Players (id)
                         on delete set null
     )''')
     print("create Half_End table was successful!")
@@ -409,8 +407,6 @@ def create_event_type_tables():
                    season_id INT NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
-                        on delete set null,
-                   FOREIGN KEY (player_id) references Players (id)
                         on delete set null
     )''')
     print("create Half_Start table was successful!")
@@ -470,8 +466,10 @@ def insert_events_type_data():
             basic_insert = ""
             if 'player' in event:
                 basic_insert = "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
+            else:
+                basic_insert = "(\'"+str(event['id'])+"\',\'"+season_id+"\'),\n"
             
-                
+            # Ball Receipt
             "Ball Receipt*"
             if type == "Ball Receipt*":
                 insert_ball_receipt += "(\'"+str(event['id'])+"\',\'"+str(event['player']['id'])+"\',\'"+event['position']['name']+"\',\'"+season_id+"\'),\n"
@@ -502,13 +500,13 @@ def insert_events_type_data():
                 insert_bad_behaviour += basic_insert
                 
 
-            # # "Half End"
-            # elif type == "Half End":
-            #     insert_half_end += basic_insert
+            # "Half End"
+            elif type == "Half End":
+                insert_half_end += basic_insert
             
-            # # "Half Start"
-            # elif type == "Half Start":
-            #     insert_half_start += basic_insert
+            # "Half Start"
+            elif type == "Half Start":
+                insert_half_start += basic_insert
 
 
 
@@ -561,11 +559,12 @@ def insert_events_type_data():
     insert_bad_behaviour = insert_bad_behaviour[:-2] + ''
     cursor.execute(insert_bad_behaviour)
     print('done insert bad behaviour')
-            
-    # cursor.execute(insert_half_end)
-    # print('done insert half end')
-    # cursor.execute(insert_half_start)
-    # print('done insert half start')
+    insert_half_end = insert_half_end[:-2] + ''
+    cursor.execute(insert_half_end)
+    print('done insert half end')
+    insert_half_start = insert_half_start[:-2] + ''
+    cursor.execute(insert_half_start)
+    print('done insert half start')
 
 insert_events_type_data()
 
