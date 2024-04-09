@@ -5,7 +5,7 @@ import re
 import datetime
 
 from db_secret import password
-from neyha_relation_building import*
+# from neyha_relation_building import*
 
 #this file is to insert data into the made tables
 
@@ -819,24 +819,24 @@ def insert_events_data():
 
 
 def insert_all_data():
-    insert_country_data()
-    insert_country2_data()
+    # insert_country_data()
+    # insert_country2_data()
 
-    #ney
-    insert_competitions_data()
+    # #ney
+    # insert_competitions_data()
     
-    insert_referee_data()
+    # insert_referee_data()
     
-    insert_stadium_data()
+    # insert_stadium_data()
 
-    insert_team_data()
+    # insert_team_data()
 
-    insert_manager_data()
+    # insert_manager_data()
 
-    insert_player_data()
+    # insert_player_data()
 
-    #ney
-    insert_matches_data()
+    # #ney
+    # insert_matches_data()
 
     insert_events_data()
 
