@@ -31,7 +31,7 @@ url = './data'
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Competitions(
-                competition_id INT NOT NULL UNIQUE,
+                competition_id INT NOT NULL,
                 season_id INT NOT NULL,
                 country_name VARCHAR(255) NOT NULL ,
                 competition_name VARCHAR(255) NOT NULL ,
@@ -87,7 +87,7 @@ def insert_competitions_data():
             insertComp += '\'' + value + '\','
         insertComp = insertComp[:-1] + '),'
         insert_competitions += insertComp
-    insert_competitions = insert_competitions[:-1] + ''
+    insert_competitions = insert_competitions[:-1] + ' ON CONFLICT DO NOTHING'
 
     # insert competition data
     cursor.execute(insert_competitions)
@@ -523,7 +523,7 @@ def insert_events_type_data():
     print('done insert_events_data()')
             
 
-insert_events_type_data()
+#insert_events_type_data()
 
 def insert_events_data():
     directory = url + '/events'
