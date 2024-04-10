@@ -31,7 +31,7 @@ url = './data'
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Competitions(
-                competition_id INT NOT NULL UNIQUE,
+                competition_id INT NOT NULL,
                 season_id INT NOT NULL,
                 country_name VARCHAR(255) NOT NULL ,
                 competition_name VARCHAR(255) NOT NULL ,
@@ -87,7 +87,7 @@ def insert_competitions_data():
             insertComp += '\'' + value + '\','
         insertComp = insertComp[:-1] + '),'
         insert_competitions += insertComp
-    insert_competitions = insert_competitions[:-1] + ''
+    insert_competitions = insert_competitions[:-1] + ' ON CONFLICT DO NOTHING'
 
     # insert competition data
     cursor.execute(insert_competitions)
@@ -207,7 +207,7 @@ def insert_positions_data():
 # "Interception"
     
 def delete_event_type_tables():
-    cursor.execute("DROP TABLE IF EXISTS dribble")
+    cursor.execute("DROP TABLE IF EXISTS Goal_Keeper")
     
 def create_event_type_tables():
     # "50/50", "Bad Behaviour", "Ball Receipt*", "Ball Recovery", "Block", "Carry", "Clearance", "Dribble", "Dribbled Past"
@@ -341,7 +341,9 @@ def create_event_type_tables():
                    position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
                    type VARCHAR(255) NOT NULL,
-                   outcome VARCHAR(255) NOT NULL,
+                   outcome VARCHAR(255),
+                   under_pressure BOOL NOT NULL,
+                   counterpress BOOL NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
                         on delete set null,
@@ -356,6 +358,11 @@ def create_event_type_tables():
                    position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
                    counterpress BOOL NOT NULL,
+                   offensive BOOL NOT NULL,
+                   advantage BOOL NOT NULL,
+                   penalty BOOL NOT NULL,
+                   card VARCHAR(255),
+                   type VARCHAR(255),
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
                         on delete set null,
@@ -369,7 +376,9 @@ def create_event_type_tables():
                    player_id INT NOT NULL,
                    position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
-                   counterpress BOOL NOT NULL,
+                   defensive BOOL NOT NULL,
+                   advantage BOOL NOT NULL,
+                   penalty BOOL NOT NULL,
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
                         on delete set null,
@@ -383,10 +392,13 @@ def create_event_type_tables():
                    player_id INT NOT NULL,
                    position_name VARCHAR(255) NOT NULL,
                    season_id INT NOT NULL,
-                   end_location_x FLOAT(1) NOT NULL,
-                   end_location_y FLOAT(1) NOT NULL,
-                   goal_position VARCHAR(255) NOT NULL,
-                   type VARCHAR(255) NOT NULL,
+                   end_location_x FLOAT(1),
+                   end_location_y FLOAT(1),
+                   goal_position VARCHAR(255),
+                   outcome VARCHAR(255),
+                   type VARCHAR(255),
+                   body_part VARCHAR(255),
+                   technique VARCHAR(255),
                    PRIMARY KEY (id),
                    FOREIGN KEY (id) references Events (id)
                         on delete set null,
@@ -457,6 +469,11 @@ def insert_events_type_data():
     insert_carry = "INSERT INTO carry (id, player_id, position_name, season_id, under_pressure, end_location_x, end_location_y) VALUES "
     insert_clearance = "INSERT INTO clearance (id, player_id, position_name, season_id, under_pressure) VALUES "
     insert_dribble = "INSERT INTO dribble (id, player_id, position_name, season_id, nutmeg, outcome) VALUES "
+    insert_duel = "INSERT INTO duel (id, player_id, position_name, season_id, type, under_pressure, outcome, counterpress) VALUES "
+    insert_foul_committed = "INSERT INTO foul_committed (id, player_id, position_name, season_id, counterpress, offensive, advantage, penalty, card, type) VALUES "
+    insert_foul_won = "INSERT INTO foul_won (id, player_id, position_name, season_id, defensive, advantage, penalty) VALUES "
+    insert_goal_keeper = "INSERT INTO goal_keeper (id, player_id, position_name, season_id, end_location_x, end_location_y, goal_position, outcome, type, body_part, technique) VALUES "
+    insert_interception = "INSERT INTO interception (id, player_id, position_name, season_id, outcome) VALUES "
     #go through each file in lineups folder
     for filename in os.listdir(directory):
         individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
@@ -521,65 +538,154 @@ def insert_events_type_data():
                     insert_dribble += basic_insert[:-2]+",NULL,\'"+event['dribble']['outcome']['name']+"\'),"
             
             # # "Duel"
-            # elif type == "Duel":
+            elif type == "Duel":
+                insert_duel += basic_insert[:-2]+",\'"+event['duel']['type']['name']+"\',\'"+str(event['under_pressure'])+"\'"
+                if 'outcome' in event['duel']:
+                    insert_duel += ",\'"+event['duel']['outcome']['name']+"\'"
+                else: 
+                    insert_duel += ",NULL"
+                if 'counterpress' in event:
+                    insert_duel += ",\'"+str(event['counterpress'])+"\'),"
+                else: 
+                    insert_duel += ",\'false\'),"
+                    
             
             # # "Foul Committed"
-            # elif type == "Foul Committed":
+            elif type == "Foul Committed":
+                insert_foul_committed += basic_insert[:-2]
+                if 'counterpress' in event:
+                    insert_foul_committed += ",\'"+str(event['counterpress'])+"\'"
+                else: 
+                    insert_foul_committed += ",\'false\'"
+
+                if 'foul_committed' in event:
+                    # check advantage, offensive, card['name'], penalty, type['name']
+                    bool_attr = ['advantage', 'offensive', 'penalty']
+                    for attr in bool_attr:
+                        if attr in event['foul_committed']:
+                            insert_foul_committed += ",\'"+str(event['foul_committed'][attr])+"\'"
+                        else: 
+                            insert_foul_committed += ",\'false\'"
+                    if 'card' in event['foul_committed']:
+                        insert_foul_committed += ",\'"+str(event['foul_committed']['card']['name'])+"\'"
+                    else: 
+                        insert_foul_committed += ",NULL"
+                    if 'type' in event['foul_committed']:
+                        insert_foul_committed += ",\'"+str(event['foul_committed']['type']['name'])+"\'"
+                    else: 
+                        insert_foul_committed += ",NULL"
+                else: 
+                    insert_foul_committed += ",\'false\',\'false\',\'false\',NULL,NULL"
+
+                
+                insert_foul_committed += "),"
             
             # # "Foul Won"
-            # elif type == "Foul Won":
+            elif type == "Foul Won":
+                insert_foul_won += basic_insert[:-2]
+
+                if 'foul_won' in event:
+                    # check advantage, defensive, penalty
+                    bool_attr = ['advantage', 'offensive', 'penalty']
+                    for attr in bool_attr:
+                        if attr in event['foul_won']:
+                            insert_foul_won += ",\'"+str(event['foul_won'][attr])+"\'"
+                        else: 
+                            insert_foul_won += ",\'false\'"
+                else: 
+                    insert_foul_won += ",\'false\',\'false\',\'false\'"
             
+                insert_foul_won += "),"
+
+
             # # "Goal Keeper"
-            # elif type == "Goal Keeper":
+            elif type == "Goal Keeper":
+                insert_goal_keeper += basic_insert[:-2]
+
+                if 'goalkeeper' in event:
+                    if 'location' in event['goalkeeper']:
+                        insert_goal_keeper += ",\'"+event['goalkeeper']['location'][0]+"\',\'"+event['goalkeeper']['location'][1]+"\'"
+                    else:
+                        insert_goal_keeper += ",NULL,NULL"
+
+                    name_attr = ['goal_position', 'outcome', 'type', 'body_part', 'technique']
+                    for attr in name_attr:
+                        if attr in event['goalkeeper']:
+                            insert_goal_keeper += ",\'"+event['goalkeeper'][attr]['name']+"\'"
+                        else: 
+                            insert_goal_keeper += ",NULL"
+                else: 
+                    insert_goal_keeper += ",NULL,NULL,NULL,NULL,NULL"
+            
+                insert_goal_keeper += "),"
             
             # # "Interception"
-            # elif type == "Interception":
+            elif type == "Interception":
+                insert_interception += basic_insert[:-2]+",\'"+event['interception']['outcome']['name']+"\'),"
+            
             
 
         filenum += 1
         print("finished file" + str(filenum) + "/468")
 
-    # insert_ball_receipt = insert_ball_receipt[:-1] + ''
-    # cursor.execute(insert_ball_receipt)
-    # insert_ball_recovery = insert_ball_recovery[:-1] + ''
-    # cursor.execute(insert_ball_recovery)
-    # print('done insert ball recovery')
-    # insert_block = insert_block[:-1] + ''
-    # cursor.execute(insert_block)
-    # print('done insert block')
-    # insert_dribbled_past = insert_dribbled_past[:-1] + ''
-    # cursor.execute(insert_dribbled_past)
-    # print('done insert dribbled past')
-    # insert_injury_stoppage = insert_injury_stoppage[:-1] + ''
-    # cursor.execute(insert_injury_stoppage)
-    # print('done insert injury stoppage')
-    # insert_5050 = insert_5050[:-1] + ''
-    # cursor.execute(insert_5050)
-    # print('done insert 5050')
-    # insert_bad_behaviour = insert_bad_behaviour[:-1] + ''
-    # cursor.execute(insert_bad_behaviour)
-    # print('done insert bad behaviour')
-    # insert_half_end = insert_half_end[:-1] + ''
-    # cursor.execute(insert_half_end)
-    # print('done insert half end')
-    # insert_half_start = insert_half_start[:-1] + ''
-    # cursor.execute(insert_half_start)
-    # print('done insert half start')
+    insert_ball_receipt = insert_ball_receipt[:-1] + ''
+    cursor.execute(insert_ball_receipt)
+    insert_ball_recovery = insert_ball_recovery[:-1] + ''
+    cursor.execute(insert_ball_recovery)
+    print('done insert ball recovery')
+    insert_block = insert_block[:-1] + ''
+    cursor.execute(insert_block)
+    print('done insert block')
+    insert_dribbled_past = insert_dribbled_past[:-1] + ''
+    cursor.execute(insert_dribbled_past)
+    print('done insert dribbled past')
+    insert_injury_stoppage = insert_injury_stoppage[:-1] + ''
+    cursor.execute(insert_injury_stoppage)
+    print('done insert injury stoppage')
+    insert_5050 = insert_5050[:-1] + ''
+    cursor.execute(insert_5050)
+    print('done insert 5050')
+    insert_bad_behaviour = insert_bad_behaviour[:-1] + ''
+    cursor.execute(insert_bad_behaviour)
+    print('done insert bad behaviour')
+    insert_half_end = insert_half_end[:-1] + ''
+    cursor.execute(insert_half_end)
+    print('done insert half end')
+    insert_half_start = insert_half_start[:-1] + ''
+    cursor.execute(insert_half_start)
+    print('done insert half start')
         
-    # insert_carry = insert_carry[:-1] + ''
-    # cursor.execute(insert_carry)
-    # print('done insert carry')
-    # insert_clearance = insert_clearance[:-1] + ''
-    # cursor.execute(insert_clearance)
-    # print('done insert clearance')
-    # insert_dribble = insert_dribble[:-1] + ''
-    # cursor.execute(insert_dribble)
-    # print('done insert dribble')
+    insert_carry = insert_carry[:-1] + ''
+    cursor.execute(insert_carry)
+    print('done insert carry')
+    insert_clearance = insert_clearance[:-1] + ''
+    cursor.execute(insert_clearance)
+    print('done insert clearance')
+    insert_dribble = insert_dribble[:-1] + ''
+    cursor.execute(insert_dribble)
+    print('done insert dribble')
+        
+    insert_duel = insert_duel[:-1] + ''
+    cursor.execute(insert_duel)
+    print('done insert duel')
+    insert_foul_committed = insert_foul_committed[:-1] + ''
+    cursor.execute(insert_foul_committed)
+    print('done insert foul_committed')
+    insert_duel = insert_duel[:-1] + ''
+    insert_foul_won = insert_foul_won[:-1] + ''
+    cursor.execute(insert_foul_won)
+    print('done insert foul_won')
+    insert_interception = insert_interception[:-1] + ''
+    cursor.execute(insert_interception)
+    print('done insert interinsert_interception')
+        
+    insert_goal_keeper = insert_goal_keeper[:-1] + ''
+    cursor.execute(insert_goal_keeper)
+    print('done insert goal_keeper')
 
 
-# insert_events_type_data()
 
-def insert_events_data():
+# def insert_events_data():
     directory = url + '/events'
     filenum = 0
     #go through each file in lineups folder
@@ -669,7 +775,7 @@ def insert_events_data():
 
 
 
-def insert_q_events_data():
+# def insert_q_events_data():
     directory = url + '/events'
     filenum = 0
     #go through each file in lineups folder
@@ -957,8 +1063,6 @@ def insert_q_events_data():
         print("finished file " + filename + ', ' + str(filenum) + "/468")
 
     print('done insert_events_data()')
-
-insert_q_events_data()
 
 conn.close()
 
