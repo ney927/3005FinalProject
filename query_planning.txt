@@ -2,37 +2,117 @@
 xG scores. Output both the player names and their average xG scores. Consider only the players
 who made at least one shot (the xG scores are greater than 0).
 
+select players.name, avg(statsbomb_xg) from shots s
+join players on s.player_id = players.id
+join events e on s.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga'
+group by players.name
+order by avg(s.statsbomb_xg) desc
+;
 
 2. Q 2: In the La Liga season of 2020/2021, find the players with the most shots. Sort them from highest to
 lowest. Output both the player names and the number of shots. Consider only the players who
 made at least one shot (the lowest number of shots should be 1, not 0).
+
+select players.name, count(*) from shots s
+join players on s.player_id = players.id
+join events e on s.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga'
+group by players.name
+order by count desc
+;
 
 3. Q 3: In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players with the
 most first-time shots. Sort them from highest to lowest. Output the player names and the number
 of first time shots. Consider only the players who made at least one shot (the lowest number of shots
 should be 1, not 0).
 
+select players.name, count(first_time) from shots s
+join players on s.player_id = players.id
+join events e on s.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name in ('2020/2021', '2019/2020', '2018/2019') and c.competition_name = 'La Liga' 
+group by players.name
+having count(first_time) > 0
+order by count(first_time) desc
+;
+
 4. Q 4: In the La Liga season of 2020/2021, find the teams with the most passes made. Sort them from
 highest to lowest. Output the team names and the number of passes. Consider the teams that
 make at least one pass (the lowest number of passes is 1, not 0).
+
+- what kind of passes? should i filter by outcome? or all passes count
+
+select teams.team_name, count(*) from pass 
+join players on pass.player_id = players.id
+join teams on teams.id = players.team_id
+join events e on pass.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' 
+group by teams.team_name
+having count(*) > 0
+order by count(*) desc
+;
 
 5. Q 5: In the Premier League season of 2003/2004, find the players who were the most intended recipients
 of passes. Sort them from highest to lowest. Output the player names and the number of times
 they were the intended recipients of passes. Consider the players who received at least one pass
 (the lowest number of times they were the intended recipients is 1, not 0).
 
+!! is recipient_id always null ?
+
 6. Q 6: In the Premier League season of 2003/2004, find the teams with the most shots made. Sort them
 from highest to lowest. Output the team names and the number of shots. Consider the teams that
 made at least one shot (the lowest number of shots is 1, not 0).
+
+select teams.team_name, count(*) from shots 
+join players on shots.player_id = players.id
+join teams on teams.id = players.team_id
+join events e on shots.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2003/2004' and c.competition_name = 'Premier League' 
+group by teams.team_name
+order by count(*) desc
+;
 
 7. Q 7: In the La Liga season of 2020/2021, find the players who made the most through balls. Sort them
 from highest to lowest. Output the player names and the number of through balls. Consider the
 players who made at least one through ball pass (the lowest number of through balls is 1, not 0).
 
+select players.name, count(*) from pass
+join players on pass.player_id = players.id
+join events e on pass.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' 
+and pass.technique = 'Through Ball'
+group by players.name
+order by count(*) desc
+;
+
 8. Q 8: In the La Liga season of 2020/2021, find the teams that made the most through balls. Sort them
 from highest to lowest. Output the team names and the number of through balls. Consider the
 teams with at least one through ball made in a match (the lowest total number of through balls is 1, not
 0).
+
+select teams.team_name, count(*) from pass
+join players on pass.player_id = players.id
+join teams on teams.id = players.team_id
+join events e on pass.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' 
+and pass.technique = 'Through Ball'
+group by teams.team_name
+order by count(*) desc
+;
 
 
 
@@ -43,10 +123,12 @@ were the most successful in completed dribbles. Sort them from highest to lowest
 names and the number of successful completed dribbles. Consider the players that made at least
 one successful dribble (the smallest number of successful dribbles is 1, not 0).
 
-** should we do a subquery to get the (90, 42, 4) tuple?
 select players.name, count(*) from dribble
-join players on players.id = dribble.player_id
-where season_id in (90, 42, 4)
+join players on dribble.player_id = players.id
+join events e on dribble.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name in ('2020/2021', '2019/2020','2018/2019') and c.competition_name = 'La Liga' 
 and outcome = 'Complete'
 group by players.name
 order by count(*) desc
@@ -56,3 +138,13 @@ order by count(*) desc
 lowest to highest. Output the player names and the number of dribbles. Consider the players
 that were at least dribbled past once (the lowest number of occurrences of dribbling past the player is 1,
 not 0)
+
+select players.name, count(*) from dribbled_past
+join players on dribbled_past.player_id = players.id
+join events e on dribbled_past.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' 
+group by players.name
+order by count(*) asc
+;

@@ -864,7 +864,7 @@ def insert_all_data():
 
     insert_events_data()
 
-insert_all_data()
+# insert_all_data()
 conn.close()
 
 print('done.')

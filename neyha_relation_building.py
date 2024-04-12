@@ -656,10 +656,13 @@ def insert_events_type_data():
     insert_dribbled_past = insert_dribbled_past[:-1] + ''
     cursor.execute(insert_dribbled_past)
     print('done insert dribbled past')
+
+    # FIX THIS PART
     insert_injury_stoppage = insert_injury_stoppage[:-1] + ''
-    print(insert_injury_stoppage) # --------------------------------!REMOVE!!!!!!!!!!!
-    cursor.execute(insert_injury_stoppage)
-    print('done insert injury stoppage')
+    # print(insert_injury_stoppage) # --------------------------------!REMOVE!!!!!!!!!!!
+    # cursor.execute(insert_injury_stoppage)
+    # print('done insert injury stoppage')
+
     insert_5050 = insert_5050[:-1] + ''
     cursor.execute(insert_5050)
     print('done insert 5050')
@@ -791,7 +794,11 @@ def insert_events_type_data():
 
     print('done insert_events_data()')
 
+# delete_event_type_tables()
+# create_event_type_tables()
+# insert_events_type_data()
 
+#fix injury stoppage and insert_event ?
 
 if __name__ == "__main__":
     conn.close()
