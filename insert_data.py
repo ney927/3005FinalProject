@@ -694,10 +694,6 @@ def insert_events_data():
                                     list_of_insertions.append(insert_freezie)
 
 
-
-                                    
-
-
                     #Pass id = 30
                     if e_type_id == 30:
                         if "pass" in event:
@@ -706,8 +702,8 @@ def insert_events_data():
                             else:
                                  assisted_shot_id = 'NULL'
 
-                            if "recipient_id" in dict(event["pass"]):
-                                recipient_id = str((dict(event["pass"])["recipient_id"]))
+                            if "recipient" in dict(event["pass"]):
+                                recipient_id = str(dict(dict(event["pass"])["recipient"])["id"])
                             else:
                                  recipient_id = 'NULL'
 
@@ -864,7 +860,7 @@ def insert_all_data():
 
     insert_events_data()
 
-# insert_all_data()
+insert_all_data()
 conn.close()
 
 print('done.')

@@ -213,9 +213,9 @@ def create_pass_table():
                    shot_assist boolean,
                    goal_assist boolean,
                    body_part VARCHAR(255),
-                   type VARCHAR(255) NOT NULL,
-                   outcome VARCHAR(255) NOT NULL,
-                   technique VARCHAR(255) NOT NULL,
+                   type VARCHAR(255),
+                   outcome VARCHAR(255),
+                   technique VARCHAR(255),
                    player_id INT NOT NULL,
                    FOREIGN KEY (id) REFERENCES Events (id),
                    FOREIGN KEY (player_id) REFERENCES Players (id)
