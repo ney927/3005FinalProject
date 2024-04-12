@@ -26,7 +26,8 @@ def printRelation(relation):
     for row in rows:
         print(row)
 
-url = './data'
+# url = './open-data/data'
+url = 'data'
 
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
@@ -207,7 +208,23 @@ def insert_positions_data():
 # "Interception"
     
 def delete_event_type_tables():
-    cursor.execute("DROP TABLE IF EXISTS Goal_Keeper")
+    cursor.execute("DROP TABLE IF EXISTS Ball_Receipt")
+    cursor.execute("DROP TABLE IF EXISTS Ball_Recovery")
+    cursor.execute("DROP TABLE IF EXISTS Block")
+    cursor.execute("DROP TABLE IF EXISTS Injury_Stoppage")
+    cursor.execute("DROP TABLE IF EXISTS event_5050")
+    cursor.execute("DROP TABLE IF EXISTS bad_behaviour")
+    cursor.execute("DROP TABLE IF EXISTS dribbled_past")
+    cursor.execute("DROP TABLE IF EXISTS half_end")
+    cursor.execute("DROP TABLE IF EXISTS half_start")
+    cursor.execute("DROP TABLE IF EXISTS carry")
+    cursor.execute("DROP TABLE IF EXISTS clearance")
+    cursor.execute("DROP TABLE IF EXISTS dribble")
+    cursor.execute("DROP TABLE IF EXISTS duel")
+    cursor.execute("DROP TABLE IF EXISTS foul_committed")
+    cursor.execute("DROP TABLE IF EXISTS foul_won")
+    cursor.execute("DROP TABLE IF EXISTS goal_keeper")
+    cursor.execute("DROP TABLE IF EXISTS interception")
     
 def create_event_type_tables():
     # "50/50", "Bad Behaviour", "Ball Receipt*", "Ball Recovery", "Block", "Carry", "Clearance", "Dribble", "Dribbled Past"
@@ -640,6 +657,7 @@ def insert_events_type_data():
     cursor.execute(insert_dribbled_past)
     print('done insert dribbled past')
     insert_injury_stoppage = insert_injury_stoppage[:-1] + ''
+    print(insert_injury_stoppage) # --------------------------------!REMOVE!!!!!!!!!!!
     cursor.execute(insert_injury_stoppage)
     print('done insert injury stoppage')
     insert_5050 = insert_5050[:-1] + ''
@@ -1064,5 +1082,7 @@ def insert_events_type_data():
 
     print('done insert_events_data()')
 
+delete_event_type_tables()
+create_event_type_tables()
+insert_events_type_data()
 conn.close()
-
