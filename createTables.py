@@ -177,7 +177,6 @@ def create_shots_table():
                    areial_won boolean,
                    follows_dribble boolean,
                    first_time boolean,
-                   freeze_frame VARCHAR(255),
                    open_goal boolean,
                    statsbomb_xg numeric NOT NULL,
                    deflected boolean,
@@ -224,6 +223,22 @@ def create_pass_table():
     )''')
     print("create_pass_table() successful!")
 
+def create_freezeFrame_table():
+    cursor.execute('''CREATE TABLE IF NOT EXISTS Freeze_Frame(
+                   id serial PRIMARY KEY,
+                   event_id VARCHAR(255) NOT NULL,
+                   location numeric[] NOT NULL,
+                   player_id INT NOT NULL,
+                   position VARCHAR(255) NOT NULL,
+                   teammate boolean NOT NULL,
+                   FOREIGN KEY (event_id) REFERENCES Events (id),
+                   FOREIGN KEY (player_id) REFERENCES Players (id)
+
+
+
+    )''')
+    print("create_freezeFrame_table() successful!")
+
 def create_all_db_tables():
     #ordered such that tables are created before their possible foreign keys are referenced
     create_country_table()
@@ -251,6 +266,7 @@ def create_all_db_tables():
     #**
     create_shots_table()
     create_pass_table()
+    create_freezeFrame_table()
 
 
 create_all_db_tables()

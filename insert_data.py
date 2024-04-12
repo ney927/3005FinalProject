@@ -677,8 +677,26 @@ def insert_events_data():
 
                             player_id =   str(dict(event["player"])["id"]) 
 
-                            insert_shot = 'INSERT INTO Shots(id, season_id, key_pass_id, end_location, areial_won, follows_dribble, first_time, freeze_frame, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id) VALUES (' + e_id + ',' + season_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  freeze_frame + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ') ON CONFLICT DO NOTHING'
+                            insert_shot = 'INSERT INTO Shots(id, season_id, key_pass_id, end_location, areial_won, follows_dribble, first_time, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id) VALUES (' + e_id + ',' + season_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ') ON CONFLICT DO NOTHING'
                             list_of_insertions.append(insert_shot)
+
+                            if "freeze_frame" in dict(event["shot"]):
+                                freeze_array = list(dict(event["shot"])["freeze_frame"])
+
+                                for freeze_elem in freeze_array:
+                                    freeze_elem_dict = dict(freeze_elem)
+                                    freeze_location = 'ARRAY' +  str(freeze_elem_dict["location"])
+                                    freeze_player_id = str(dict(freeze_elem_dict["player"])["id"])
+                                    freeze_player_position = '\'' + str(dict(freeze_elem_dict["position"])["name"]) + '\''
+                                    freeze_teammate = str(freeze_elem_dict["teammate"])
+
+                                    insert_freezie = 'INSERT INTO Freeze_Frame(event_id, location, player_id, position, teammate) VALUES (' + e_id + ',' + freeze_location + ',' + freeze_player_id + ',' + freeze_player_position + ',' + freeze_teammate + ') ON CONFLICT DO NOTHING'
+                                    list_of_insertions.append(insert_freezie)
+
+
+
+                                    
+
 
                     #Pass id = 30
                     if e_type_id == 30:
