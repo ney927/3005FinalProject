@@ -26,7 +26,8 @@ def printRelation(relation):
     for row in rows:
         print(row)
 
-url = './data'
+# url = './open-data/data'
+url = 'data'
 
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():
@@ -207,7 +208,23 @@ def insert_positions_data():
 # "Interception"
     
 def delete_event_type_tables():
-    cursor.execute("DROP TABLE IF EXISTS Goal_Keeper")
+    cursor.execute("DROP TABLE IF EXISTS Ball_Receipt")
+    cursor.execute("DROP TABLE IF EXISTS Ball_Recovery")
+    cursor.execute("DROP TABLE IF EXISTS Block")
+    cursor.execute("DROP TABLE IF EXISTS Injury_Stoppage")
+    cursor.execute("DROP TABLE IF EXISTS event_5050")
+    cursor.execute("DROP TABLE IF EXISTS bad_behaviour")
+    cursor.execute("DROP TABLE IF EXISTS dribbled_past")
+    cursor.execute("DROP TABLE IF EXISTS half_end")
+    cursor.execute("DROP TABLE IF EXISTS half_start")
+    cursor.execute("DROP TABLE IF EXISTS carry")
+    cursor.execute("DROP TABLE IF EXISTS clearance")
+    cursor.execute("DROP TABLE IF EXISTS dribble")
+    cursor.execute("DROP TABLE IF EXISTS duel")
+    cursor.execute("DROP TABLE IF EXISTS foul_committed")
+    cursor.execute("DROP TABLE IF EXISTS foul_won")
+    cursor.execute("DROP TABLE IF EXISTS goal_keeper")
+    cursor.execute("DROP TABLE IF EXISTS interception")
     
 def create_event_type_tables():
     # "50/50", "Bad Behaviour", "Ball Receipt*", "Ball Recovery", "Block", "Carry", "Clearance", "Dribble", "Dribbled Past"
@@ -639,9 +656,13 @@ def insert_events_type_data():
     insert_dribbled_past = insert_dribbled_past[:-1] + ''
     cursor.execute(insert_dribbled_past)
     print('done insert dribbled past')
+
+    # FIX THIS PART
     insert_injury_stoppage = insert_injury_stoppage[:-1] + ''
-    cursor.execute(insert_injury_stoppage)
-    print('done insert injury stoppage')
+    # print(insert_injury_stoppage) # --------------------------------!REMOVE!!!!!!!!!!!
+    # cursor.execute(insert_injury_stoppage)
+    # print('done insert injury stoppage')
+
     insert_5050 = insert_5050[:-1] + ''
     cursor.execute(insert_5050)
     print('done insert 5050')
@@ -773,296 +794,11 @@ def insert_events_type_data():
 
     print('done insert_events_data()')
 
+# delete_event_type_tables()
+# create_event_type_tables()
+# insert_events_type_data()
 
-
-# def insert_q_events_data():
-    directory = url + '/events'
-    filenum = 0
-    #go through each file in lineups folder
-    for filename in os.listdir(directory):
-        individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
-
-        #NEYHA ADDED THIS
-        cursor.execute("SELECT season_id FROM matches WHERE matches.match_id="+filename[:-5]+";")
-        season_id = str(cursor.fetchone()[0])
-
-        grab_from_attribues = ["id","match_id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics","location"]
-
-        #if filename != '15946.json':
-        #    continue
-            
-        #print(foldername)
-        #print(filename)
-        #for each event in a json file
-        for event in individual_match_json:
-            insert_event = 'INSERT INTO Events (id, match_id, index, period, timestamp, minute, second, type, possession, possesstion_team, play_pattern, team, duration, tactics, location) VALUES ('
-            insert_miscontrol = ''
-            list_of_insertions = []
-            insert_all_shots = [] #NEYHA ADDED THIS
-            #for each dictionary (match)
-            for attribute in grab_from_attribues:
-                #verify attribute is present
-                #if attribute in event:
-                #    print(attribute + '===' + str(event[attribute]))
-
-                # e shorthand for event
-                if attribute == 'id':
-                    e_id = '\'' +  str(event[attribute]) + '\''
-
-                if attribute == 'index':
-                    e_index = str(event[attribute])
-
-                if attribute == 'period':
-                    e_period = str(event[attribute])
-
-                if attribute == 'timestamp':
-                    e_timestamp = '\'' + str(event[attribute]) + '\''
-
-                if attribute == 'minute':
-                    e_minute = str(event[attribute])
-
-                if attribute == 'second':
-                    e_second = str(event[attribute])
-
-                if attribute == 'type':
-                    e_type = '\'' +  str(dict(event[attribute])["name"])  + '\''
-
-                    e_type_id = int(dict(event[attribute])["id"])
-                    #print(e_type)
-                    
-                    #Misconntrol id = 38
-                    if e_type_id == 38:
-                        #print("misscontrolli")
-                        if "miscontrol" in event:
-                            aerial = str(dict(event["miscontrol"])["aerial_won"]) 
-                            player_id =   str(dict(event["player"])["id"]) 
-                            insert_miscontrol = 'INSERT INTO Miscontrol (id, areial_won, player_id) VALUES (' + e_id + ',' + aerial + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            #cursor.execute(insert_miscontrol)
-                            list_of_insertions.append(insert_miscontrol)
-
-
-                        #print("ball receeeeeee")
-
-                    #Player Off id = 27
-                    if e_type_id == 27:
-                        #print(filename)
-                        if "player_off" in event:
-                            permanent = str(dict(event["player_off"])["permanent"]) 
-                            player_id =   str(dict(event["player"])["id"]) 
-                            insert_player_off = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + permanent + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            list_of_insertions.append(insert_player_off)
-                    
-                    #Pressure id = 17
-                    if e_type_id == 17:
-                        #print("1")
-                        if "counterpress" in event:
-                            #print("2")
-                            counterpress = str(event["counterpress"]) 
-                            player_id =   str(dict(event["player"])["id"]) 
-                            insert_counterpress = 'INSERT INTO Player_Off (id, permanent, player_id) VALUES (' + e_id + ',' + counterpress + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            list_of_insertions.append(insert_counterpress)
-
-                    #Substitution id = 19
-                    if e_type_id == 19:
-                        if "substitution" in event:
-                            #print("2")
-                            replacement_id = str(dict(dict(event["substitution"])["replacement"])["id"]) 
-                            sub_outcome = '\'' +  str(dict(dict(event["substitution"])["outcome"])["name"]) + '\''
-                            player_id =   str(dict(event["player"])["id"]) 
-                            insert_substitution = 'INSERT INTO Substitution(id, replacement_player_id, outcome, player_id) VALUES (' + e_id + ',' + replacement_id + ',' + sub_outcome + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            list_of_insertions.append(insert_substitution)
-
-                    #Shots id = 16 
-                    if e_type_id == 16:
-                        if "shot" in event:
-                            if "key_pass_id" in dict(event["shot"]):
-                                key_pass_id = '\''+ str((dict(event["shot"])["key_pass_id"])) + '\''
-                            else:
-                                 key_pass_id = 'NULL'
-                            
-                            shot_end_location = 'ARRAY' + str(dict(event["shot"])["end_location"])
-                            if "areial_won" in dict(event["shot"]):
-                                areial_won = str((dict(event["shot"])["areial_won"]))
-                            else:
-                                 areial_won = 'NULL'
-
-                            if "follows_dribble" in dict(event["shot"]):
-                                follows_dribble = str((dict(event["shot"])["follows_dribble"]))
-                            else:
-                                 follows_dribble = 'NULL'
-
-                            if "first_time" in dict(event["shot"]):
-                                first_time = str((dict(event["shot"])["first_time"]))
-                            else:
-                                first_time = 'NULL'
-
-                            if "freeze_frame" in dict(event["shot"]):
-                                #change
-                                freeze_frame = 'NULL'
-                                #'\"' + str((dict(event["shot"])["freeze_frame"])) + '\"'
-                            else:
-                                freeze_frame = 'NULL'
-
-                            if "open_goal" in dict(event["shot"]):
-                                open_goal = str((dict(event["shot"])["open_goal"]))
-                            else:
-                                open_goal = 'NULL'
-
-                            statsbomb_xg = str((dict(event["shot"])["statsbomb_xg"])) 
-
-                            if "deflected" in dict(event["shot"]):
-                                shot_deflected = str((dict(event["shot"])["deflected"]))
-                            else:
-                                shot_deflected = 'NULL'
-
-                            technique = '\'' + str(dict(dict(event["shot"])["technique"])["name"]) + '\''
-                            
-                            body_part = '\'' + str(dict(dict(event["shot"])["body_part"])["name"]) + '\''
-                            
-                            shot_type = '\'' + str(dict(dict(event["shot"])["type"])["name"]) + '\''
-
-                            shot_outcome = '\'' + str(dict(dict(event["shot"])["outcome"])["name"]) + '\''
-
-                            player_id =   str(dict(event["player"])["id"]) 
-
-                            # NEYHA CHANGED THIS
-                            insert_shot = 'INSERT INTO Shots(id, key_pass_id, end_location, areial_won, follows_dribble, first_time, freeze_frame, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id, season_id) VALUES (' + e_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  freeze_frame + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ','+season_id+') ON CONFLICT DO NOTHING'
-                            insert_all_shots.append(insert_shot)
-                            # list_of_insertions.append(insert_shot)
-
-                    #Pass id = 30
-                    if e_type_id == 30:
-                        if "pass" in event:
-                            if "assisted_shot_id" in dict(event["pass"]):
-                                assisted_shot_id = '\''+ str((dict(event["pass"])["assisted_shot_id"])) + '\''
-                            else:
-                                 assisted_shot_id = 'NULL'
-
-                            if "recipient_id" in dict(event["pass"]):
-                                recipient_id = str((dict(event["pass"])["recipient_id"]))
-                            else:
-                                 recipient_id = 'NULL'
-
-                            p_length = str((dict(event["pass"])["length"])) 
-                            p_angle = str((dict(event["pass"])["angle"]))
-                            p_height = '\'' + str(dict(dict(event["pass"])["height"])["name"]) + '\''
-                            pass_end_location = 'ARRAY' + str(dict(event["pass"])["end_location"])
-
-                            if "backheel" in dict(event["pass"]):
-                                backheel = str((dict(event["pass"])["backheel"]))
-                            else:
-                                 backheel = 'NULL'
-                                
-                            if "deflected" in dict(event["pass"]):
-                                pass_deflected = str((dict(event["pass"])["deflected"]))
-                            else:
-                                pass_deflected = 'NULL'
-
-                            if "miscommunication" in dict(event["pass"]):
-                                miscommunication = str((dict(event["pass"])["miscommunication"]))
-                            else:
-                                miscommunication = 'NULL'
-
-                            if "cross" in dict(event["pass"]):
-                                cross = str((dict(event["pass"])["cross"]))
-                            else:
-                                cross = 'NULL'
-
-                            if "cut_back" in dict(event["pass"]):
-                                cut_back = str((dict(event["pass"])["cut_back"]))
-                            else:
-                                cut_back = 'NULL'
-
-                            if "switch" in dict(event["pass"]):
-                                switch = str((dict(event["pass"])["switch"]))
-                            else:
-                                switch = 'NULL'
-
-                            if "shot_assist" in dict(event["pass"]):
-                                shot_assist = str((dict(event["pass"])["shot_assist"]))
-                            else:
-                                shot_assist = 'NULL'
-
-                            if "goal_assist" in dict(event["pass"]):
-                                goal_assist = str((dict(event["pass"])["goal_assist"]))
-                            else:
-                                goal_assist = 'NULL'
-
-                            if "body_part" in dict(event["pass"]):
-                                pass_body_part = '\'' + str(dict(dict(event["pass"])["body_part"])["name"]) + '\''
-                            else:
-                                pass_body_part = 'NULL'
-
-                            if "type" in dict(event["pass"]):
-                                pass_type = '\'' + str(dict(dict(event["pass"])["type"])["name"]) + '\''
-                            else:
-                                pass_type = 'NULL'
-
-                            if "outcome" in dict(event["pass"]):
-                                p_outcome = '\'' + str(dict(dict(event["pass"])["outcome"])["name"]) + '\''
-                            else:
-                                p_outcome = 'NULL'
-
-                            if "technique" in dict(event["pass"]):
-                                p_technique = '\'' + str(dict(dict(event["pass"])["technique"])["name"]) + '\''
-                            else:
-                                p_technique = 'NULL'
-
-                            player_id =   str(dict(event["player"])["id"]) 
-
-                            insert_pass = 'INSERT INTO Pass(id, assisted_shot_id, recipient_id, legnth, angle, height, end_location, backheel, deflected, miscommunication, cross_pass, cut_back, switch, shot_assist, goal_assist, body_part, type, outcome, technique, player_id) VALUES (' + e_id + ',' + assisted_shot_id + ',' +  recipient_id + ',' +  p_length + ',' +  p_angle + ',' +  p_height + ',' +  pass_end_location + ',' +  backheel + ',' +  pass_deflected + ',' +  miscommunication + ',' +  cross + ',' + cut_back + ',' +  switch + ',' +  shot_assist + ',' + goal_assist + ',' + pass_body_part + ',' + pass_type + ',' + p_outcome + ',' + p_technique + ',' + player_id + ') ON CONFLICT DO NOTHING'
-                            list_of_insertions.append(insert_pass)
-
-
-                if attribute == 'possession':
-                    e_possession = str(event[attribute])
-
-                if attribute == 'possession_team':
-                    e_possession_team = '\'' + str(dict(event[attribute])["id"]) + '\''
-
-                if attribute == 'play_pattern':
-                    e_play_pattern = '\'' + str(dict(event[attribute])["name"]) + '\''
-                    
-
-                if attribute == 'team':
-                    e_team = str(event[attribute])
-                    e_team = e_team.split(',')[0].split(': ')[1]
-
-                if attribute == 'duration':
-                    if attribute in event:
-                        e_duration = str(event[attribute])
-                    else :
-                        e_duration = 'NULL'
-                    
-
-                if attribute == 'tactics':
-                    if attribute in event and "name" in dict(event[attribute]):
-                        e_tactics = '\'' + str(dict(event[attribute])["name"]) + '\''
-                    else :
-                        e_tactics = 'NULL'
-
-                if attribute == 'location':
-                    if attribute in event:
-                        location = 'ARRAY' + str(event[attribute])
-                    else :
-                        location = 'NULL'
-
-                if attribute == 'match_id':
-                    match_id = str(filename).replace('.json', '')
-            insert_event +=  e_id  + ',' + match_id + ','+ e_index + ',' + e_period + ',' + e_timestamp + ',' +  e_minute + ',' + e_second + ',' +  e_type + ',' +  e_possession + ',' +  e_possession_team + ',' +  e_play_pattern + ',' +  e_team + ',' +  e_duration + ',' + e_tactics + ',' + location + ') ON CONFLICT DO NOTHING'
-            
-            # list_of_insertions.insert(0,insert_event)
-
-            # for insertion in list_of_insertions:
-            #     cursor.execute(insertion)
-
-            #NEYHA ADDED THIS
-            for insertion in insert_all_shots:
-                cursor.execute(insertion)
-        filenum += 1
-        print("finished file " + filename + ', ' + str(filenum) + "/468")
-
-    print('done insert_events_data()')
+#fix injury stoppage and insert_event ?
 
 if __name__ == "__main__":
     conn.close()
