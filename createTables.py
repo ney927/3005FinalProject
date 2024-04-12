@@ -171,6 +171,7 @@ def create_shots_table():
     #change freeze frame
     cursor.execute('''CREATE TABLE IF NOT EXISTS Shots(
                    id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   season_id INT NOT NULL,
                    key_pass_id VARCHAR(255),
                    end_location numeric[] NOT NULL,
                    areial_won boolean,
@@ -197,6 +198,7 @@ def create_pass_table():
     #cross needed to be changed to cross_pass
     cursor.execute('''CREATE TABLE IF NOT EXISTS Pass(
                    id VARCHAR(255) UNIQUE NOT NULL PRIMARY KEY,
+                   season_id INT NOT NULL,
                    assisted_shot_id VARCHAR(255),
                    recipient_id INT,
                    legnth numeric NOT NULL,

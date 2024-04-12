@@ -3,6 +3,7 @@ import json
 import os
 import re 
 import datetime
+from neyha_relation_building import*
 
 from db_secret import password
 # from neyha_relation_building import*
@@ -530,7 +531,12 @@ def insert_events_data():
     directory = url + '/events'
     filenum = 0
     #go through each file in lineups folder
+
+    
     for filename in os.listdir(directory):
+        cursor.execute("SELECT season_id FROM matches WHERE matches.match_id="+filename[:-5]+";")
+        season_id = str(cursor.fetchone()[0])
+
         individual_match_json = json.load(open(directory + '/' + filename, 'r', encoding='utf-8'))
 
         grab_from_attribues = ["id","match_id","index","period","timestamp","minute","second","type","possession","possession_team","play_pattern","team","duration","tactics","location"]
@@ -671,7 +677,7 @@ def insert_events_data():
 
                             player_id =   str(dict(event["player"])["id"]) 
 
-                            insert_shot = 'INSERT INTO Shots(id, key_pass_id, end_location, areial_won, follows_dribble, first_time, freeze_frame, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id) VALUES (' + e_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  freeze_frame + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ') ON CONFLICT DO NOTHING'
+                            insert_shot = 'INSERT INTO Shots(id, season_id, key_pass_id, end_location, areial_won, follows_dribble, first_time, freeze_frame, open_goal, statsbomb_xg, deflected, technique, body_part, type, outcome,player_id) VALUES (' + e_id + ',' + season_id + ',' + key_pass_id + ',' +  shot_end_location + ',' +  areial_won + ',' +  follows_dribble + ',' +  first_time + ',' +  freeze_frame + ',' +  open_goal + ',' +  statsbomb_xg + ',' +  shot_deflected + ',' +  technique + ',' + body_part + ',' +  shot_type + ',' +  shot_outcome + ',' +  player_id + ') ON CONFLICT DO NOTHING'
                             list_of_insertions.append(insert_shot)
 
                     #Pass id = 30
@@ -754,7 +760,7 @@ def insert_events_data():
 
                             player_id =   str(dict(event["player"])["id"]) 
 
-                            insert_pass = 'INSERT INTO Pass(id, assisted_shot_id, recipient_id, legnth, angle, height, end_location, backheel, deflected, miscommunication, cross_pass, cut_back, switch, shot_assist, goal_assist, body_part, type, outcome, technique, player_id) VALUES (' + e_id + ',' + assisted_shot_id + ',' +  recipient_id + ',' +  p_length + ',' +  p_angle + ',' +  p_height + ',' +  pass_end_location + ',' +  backheel + ',' +  pass_deflected + ',' +  miscommunication + ',' +  cross + ',' + cut_back + ',' +  switch + ',' +  shot_assist + ',' + goal_assist + ',' + pass_body_part + ',' + pass_type + ',' + p_outcome + ',' + p_technique + ',' + player_id + ') ON CONFLICT DO NOTHING'
+                            insert_pass = 'INSERT INTO Pass(id, season_id, assisted_shot_id, recipient_id, legnth, angle, height, end_location, backheel, deflected, miscommunication, cross_pass, cut_back, switch, shot_assist, goal_assist, body_part, type, outcome, technique, player_id) VALUES (' + e_id + ',' + season_id + ',' + assisted_shot_id + ',' +  recipient_id + ',' +  p_length + ',' +  p_angle + ',' +  p_height + ',' +  pass_end_location + ',' +  backheel + ',' +  pass_deflected + ',' +  miscommunication + ',' +  cross + ',' + cut_back + ',' +  switch + ',' +  shot_assist + ',' + goal_assist + ',' + pass_body_part + ',' + pass_type + ',' + p_outcome + ',' + p_technique + ',' + player_id + ') ON CONFLICT DO NOTHING'
                             list_of_insertions.append(insert_pass)
 
 
@@ -819,24 +825,24 @@ def insert_events_data():
 
 
 def insert_all_data():
-    # insert_country_data()
-    # insert_country2_data()
+    insert_country_data()
+    insert_country2_data()
 
     # #ney
-    # insert_competitions_data()
+    insert_competitions_data()
     
-    # insert_referee_data()
+    insert_referee_data()
     
-    # insert_stadium_data()
+    insert_stadium_data()
 
-    # insert_team_data()
+    insert_team_data()
 
-    # insert_manager_data()
+    insert_manager_data()
 
-    # insert_player_data()
+    insert_player_data()
 
     # #ney
-    # insert_matches_data()
+    insert_matches_data()
 
     insert_events_data()
 
