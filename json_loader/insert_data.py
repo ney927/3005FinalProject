@@ -826,7 +826,7 @@ def insert_events_data():
             for insertion in list_of_insertions:
                 cursor.execute(insertion)
         filenum += 1
-        print("finished file " + filename + ', ' + str(filenum) + "/468")
+        print("finished file " + filename + ',' + str(filenum) + "/468")
 
     print('done insert_events_data()')
 
@@ -853,7 +853,10 @@ def insert_all_data():
 
     insert_events_data()
 
-insert_all_data()
-conn.close()
+    insert_events_type_data()
 
-print('done.')
+if __name__ == "__main__":
+    insert_all_data()
+    conn.close()
+
+    print('done.')

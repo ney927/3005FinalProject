@@ -3,8 +3,6 @@ import json
 
 from db_secret import password
 from neyha_relation_building import*
-#this file is to teardown all tables in the database
-    #note from neyha. ^ is this correct? seems like its creating tables but not deleting any?
 
 conn = psycopg2.connect(
     database = 'project_database',
@@ -19,7 +17,6 @@ cursor = conn.cursor()
 print("databse connected!")
 
 url = './data'
-competitions_json = json.load(open(url+'/competitions.json', 'r', encoding='utf-8'))
 
 def create_country_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Countrys(
@@ -268,7 +265,11 @@ def create_all_db_tables():
     create_pass_table()
     create_freezeFrame_table()
 
+    create_event_type_tables()
 
-create_all_db_tables()
 
-conn.close()
+
+if __name__ == "__main__":
+    create_all_db_tables()
+
+    conn.close()

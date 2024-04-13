@@ -855,10 +855,8 @@ def insert_events_type_data():
 # create_event_type_tables()
 # insert_events_type_data()
 
-#fix injury stoppage
 
-# if __name__ == "__main__":
-conn.close()
+if __name__ == "__main__":
+    conn.close()
 
-print("db connection closed")
 
