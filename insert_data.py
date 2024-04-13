@@ -11,7 +11,7 @@ from db_secret import password
 #this file is to insert data into the made tables
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',
@@ -864,7 +864,7 @@ def insert_all_data():
 
     insert_events_data()
 
-# insert_all_data()
+insert_all_data()
 conn.close()
 
 print('done.')

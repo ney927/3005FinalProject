@@ -65,7 +65,7 @@ of passes. Sort them from highest to lowest. Output the player names and the num
 they were the intended recipients of passes. Consider the players who received at least one pass
 (the lowest number of times they were the intended recipients is 1, not 0).
 
-!! is recipient_id always null ?
+!! why is recipient_id always null ?
 
 6. Q 6: In the Premier League season of 2003/2004, find the teams with the most shots made. Sort them
 from highest to lowest. Output the team names and the number of shots. Consider the teams that
@@ -115,9 +115,6 @@ order by count(*) desc
 ;
 
 
-
-BONUS QUERIES
-
 9. Q 9: In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players that
 were the most successful in completed dribbles. Sort them from highest to lowest. Output the player
 names and the number of successful completed dribbles. Consider the players that made at least
@@ -148,3 +145,13 @@ where c.season_name = '2020/2021' and c.competition_name = 'La Liga'
 group by players.name
 order by count(*) asc
 ;
+
+
+BONUS QUERIES
+
+1. Divide the goal into 6 equal-size areas (top-left, top-middle, top-right, bottom-left, bottom-middle, and
+bottom-right). In the La Liga seasons of 2020/2021, 2019/2020, and 2018/2019 combined, find the players
+who shot the most in either the top-left or top-right corners. Sort them from highest to lowest.
+
+2. In the La Liga season of 2020/2021, find the teams with the most successful passes into the box. Sort
+them from the highest to lowest.
