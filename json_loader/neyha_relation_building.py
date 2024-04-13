@@ -27,7 +27,7 @@ def printRelation(relation):
         print(row)
 
 # url = './open-data/data'
-url = 'data'
+url = './json_loader/data'
 
 # TODO -> THE SCHEMA FOR CREATE TABLE STATEMENT IS INCOMPLETED (missing stuff like unique, null, primary key, etc.)
 def create_competitions_table():

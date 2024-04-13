@@ -5,7 +5,7 @@ import json
 #change password var to your password if you want this to connect to your postgres
 #also it won't work if you haven't created a soccer db in pg4admin
 #this can just be used as a reference of how to connect to db
-from db_secret import password
+from json_loader.db_secret import password
 
 conn = psycopg2.connect(
     database = 'project_database',

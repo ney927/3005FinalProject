@@ -22,7 +22,7 @@ conn.autocommit = True
 cursor = conn.cursor()
 print("databse connected!")
 
-url = './data'
+url = './json_loader/data'
 
 
 def insert_country_data():
@@ -758,7 +758,7 @@ def insert_events_data():
                             if "outcome" in dict(event["pass"]):
                                 p_outcome = '\'' + str(dict(dict(event["pass"])["outcome"])["name"]) + '\''
                             else:
-                                p_outcome = 'Complete'
+                                p_outcome = '\'' + 'Complete' + '\'' 
 
                             if "technique" in dict(event["pass"]):
                                 p_technique = '\'' + str(dict(dict(event["pass"])["technique"])["name"]) + '\''
