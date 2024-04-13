@@ -9,7 +9,7 @@ import os
 from db_secret import password
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',

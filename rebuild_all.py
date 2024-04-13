@@ -10,7 +10,7 @@ from createTables import *
 #NOTE -> this file does not build / teardown any events tables
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',

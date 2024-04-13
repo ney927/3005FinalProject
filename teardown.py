@@ -5,7 +5,7 @@ from db_secret import password
 #this file is to teardown all tables in the database
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',

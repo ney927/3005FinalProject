@@ -60,6 +60,18 @@ having count(*) > 0
 order by count(*) desc
 ;
 
+select teams.team_name, count(*) from pass 
+join players on pass.player_id = players.id
+join teams on teams.id = players.team_id
+join events e on pass.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' and pass.outcome = 'Complete'
+group by teams.team_name
+having count(*) > 0
+order by count(*) desc
+;
+
 5. Q 5: In the Premier League season of 2003/2004, find the players who were the most intended recipients
 of passes. Sort them from highest to lowest. Output the player names and the number of times
 they were the intended recipients of passes. Consider the players who received at least one pass

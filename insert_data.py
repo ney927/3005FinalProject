@@ -11,7 +11,7 @@ from db_secret import password
 #this file is to insert data into the made tables
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',
@@ -641,31 +641,24 @@ def insert_events_data():
                             if "follows_dribble" in dict(event["shot"]):
                                 follows_dribble = str((dict(event["shot"])["follows_dribble"]))
                             else:
-                                 follows_dribble = 'NULL'
+                                 follows_dribble = 'false'
 
                             if "first_time" in dict(event["shot"]):
                                 first_time = str((dict(event["shot"])["first_time"]))
                             else:
-                                first_time = 'NULL'
-
-                            if "freeze_frame" in dict(event["shot"]):
-                                #change
-                                freeze_frame = 'NULL'
-                                #'\"' + str((dict(event["shot"])["freeze_frame"])) + '\"'
-                            else:
-                                freeze_frame = 'NULL'
+                                first_time = 'false'
 
                             if "open_goal" in dict(event["shot"]):
                                 open_goal = str((dict(event["shot"])["open_goal"]))
                             else:
-                                open_goal = 'NULL'
+                                open_goal = 'false'
 
                             statsbomb_xg = str((dict(event["shot"])["statsbomb_xg"])) 
 
                             if "deflected" in dict(event["shot"]):
                                 shot_deflected = str((dict(event["shot"])["deflected"]))
                             else:
-                                shot_deflected = 'NULL'
+                                shot_deflected = 'false'
 
                             technique = '\'' + str(dict(dict(event["shot"])["technique"])["name"]) + '\''
                             
@@ -715,42 +708,42 @@ def insert_events_data():
                             if "backheel" in dict(event["pass"]):
                                 backheel = str((dict(event["pass"])["backheel"]))
                             else:
-                                 backheel = 'NULL'
+                                 backheel = 'false'
                                 
                             if "deflected" in dict(event["pass"]):
                                 pass_deflected = str((dict(event["pass"])["deflected"]))
                             else:
-                                pass_deflected = 'NULL'
+                                pass_deflected = 'false'
 
                             if "miscommunication" in dict(event["pass"]):
                                 miscommunication = str((dict(event["pass"])["miscommunication"]))
                             else:
-                                miscommunication = 'NULL'
+                                miscommunication = 'false'
 
                             if "cross" in dict(event["pass"]):
                                 cross = str((dict(event["pass"])["cross"]))
                             else:
-                                cross = 'NULL'
+                                cross = 'false'
 
                             if "cut_back" in dict(event["pass"]):
                                 cut_back = str((dict(event["pass"])["cut_back"]))
                             else:
-                                cut_back = 'NULL'
+                                cut_back = 'false'
 
                             if "switch" in dict(event["pass"]):
                                 switch = str((dict(event["pass"])["switch"]))
                             else:
-                                switch = 'NULL'
+                                switch = 'false'
 
                             if "shot_assist" in dict(event["pass"]):
                                 shot_assist = str((dict(event["pass"])["shot_assist"]))
                             else:
-                                shot_assist = 'NULL'
+                                shot_assist = 'false'
 
                             if "goal_assist" in dict(event["pass"]):
                                 goal_assist = str((dict(event["pass"])["goal_assist"]))
                             else:
-                                goal_assist = 'NULL'
+                                goal_assist = 'false'
 
                             if "body_part" in dict(event["pass"]):
                                 pass_body_part = '\'' + str(dict(dict(event["pass"])["body_part"])["name"]) + '\''
@@ -765,7 +758,7 @@ def insert_events_data():
                             if "outcome" in dict(event["pass"]):
                                 p_outcome = '\'' + str(dict(dict(event["pass"])["outcome"])["name"]) + '\''
                             else:
-                                p_outcome = 'NULL'
+                                p_outcome = 'Complete'
 
                             if "technique" in dict(event["pass"]):
                                 p_technique = '\'' + str(dict(dict(event["pass"])["technique"])["name"]) + '\''

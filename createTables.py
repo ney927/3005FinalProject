@@ -7,7 +7,7 @@ from neyha_relation_building import*
     #note from neyha. ^ is this correct? seems like its creating tables but not deleting any?
 
 conn = psycopg2.connect(
-    database = 'soccer',
+    database = 'project_database',
     user = 'postgres',
     password = password,
     host = 'localhost',
