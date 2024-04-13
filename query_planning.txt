@@ -60,12 +60,32 @@ having count(*) > 0
 order by count(*) desc
 ;
 
+select teams.team_name, count(*) from pass 
+join players on pass.player_id = players.id
+join teams on teams.id = players.team_id
+join events e on pass.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2020/2021' and c.competition_name = 'La Liga' and pass.outcome = 'Complete'
+group by teams.team_name
+having count(*) > 0
+order by count(*) desc
+;
+
 5. Q 5: In the Premier League season of 2003/2004, find the players who were the most intended recipients
 of passes. Sort them from highest to lowest. Output the player names and the number of times
 they were the intended recipients of passes. Consider the players who received at least one pass
 (the lowest number of times they were the intended recipients is 1, not 0).
 
-!! why is recipient_id always null ?
+select players.name, count(*) from pass p
+join players on recipient_id = players.id
+join events e on p.id = e.id
+join matches m on e.match_id = m.match_id
+join competitions c on m.competition_id = c.competition_id
+where c.season_name = '2003/2004' and c.competition_name = 'Premier League' 
+group by players.name
+order by count desc
+;
 
 6. Q 6: In the Premier League season of 2003/2004, find the teams with the most shots made. Sort them
 from highest to lowest. Output the team names and the number of shots. Consider the teams that

@@ -24,15 +24,15 @@ competitions_json = json.load(open(url+'/competitions.json', 'r', encoding='utf-
 def create_country_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Countrys(
                    id INT UNIQUE NOT NULL PRIMARY KEY,
-                   name VARCHAR(255)
+                   name VARCHAR(255) UNIQUE NOT NULL
     )''')
     print("create_country_table() successful!")
 
 def create_referee_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Referees(
                    id INT UNIQUE NOT NULL PRIMARY KEY,
-                   name VARCHAR(255),
-                   country_id INT,
+                   name VARCHAR(255) NOT NULL,
+                   country_id INT NOT NULL,
                    FOREIGN KEY (country_id) REFERENCES Countrys (id)
 
     )''')
@@ -41,8 +41,8 @@ def create_referee_table():
 def create_stadium_table():
     cursor.execute('''CREATE TABLE IF NOT EXISTS Stadiums(
                    id INT UNIQUE NOT NULL PRIMARY KEY,
-                   name VARCHAR(255),
-                   country_id INT,
+                   name VARCHAR(255) NOT NULL,
+                   country_id INT NOT NULL,
                    FOREIGN KEY (country_id) REFERENCES Countrys (id)
 
     )''')
